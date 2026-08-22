@@ -1,0 +1,123 @@
+% =====================================
+% CONFIGURACIÓN DE FUENTES (XeLaTeX)
+% =====================================
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+
+% =====================================
+% IDIOMA
+% =====================================
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{csquotes}
+
+% =====================================
+% GEOMETRÍA Y MÁRGENES
+% =====================================
+\usepackage[
+a4paper,
+top=2.54cm,
+bottom=2.54cm,
+left=2.54cm,
+right=2.54cm,
+]{geometry}
+
+% =====================================
+% ESPACIADO E INTERLINEADO
+% =====================================
+\usepackage{setspace}
+
+% =====================================
+% GRÁFICOS
+% =====================================
+\usepackage{graphicx}
+\usepackage{float}
+
+% =====================================
+% TABLAS
+% =====================================
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage[table]{xcolor}
+\definecolor{lightgray}{gray}{0.9}
+
+% =====================================
+% MATEMÁTICAS Y ECUACIONES
+% =====================================
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+
+% =====================================
+% MANEJO DE URLs Y SALTOS DE LÍNEA
+% =====================================
+\usepackage{url}
+\usepackage{xurl}  % Permite saltos de línea en URLs
+
+% Configurar caracteres donde se permite romper URLs
+\def\UrlBreaks{\do\/\do\-\do\.\do\=\do\?\do\&}
+\def\UrlBigBreaks{\do\:\do\@}
+
+% =====================================
+% ENLACES (debe ir después de url)
+% =====================================
+\usepackage[hidelinks,breaklinks=true]{hyperref}
+
+% =====================================
+% BIBLIOGRAFÍA
+% =====================================
+\usepackage[
+style=ieee,
+backend=biber,
+sorting=none,
+maxbibnames=99,
+minbibnames=1,
+giveninits=true,
+doi=true,
+url=true,
+isbn=false,
+eprint=false
+]{biblatex}
+
+% Configuración adicional para bibliografía IEEE
+
+% Títulos en cursiva para artículos, conferencias y misc
+\DeclareFieldFormat[article,inproceedings,misc,techreport]{title}{\textit{#1}}
+
+% Formato de URLs con saltos de línea
+\DeclareFieldFormat{url}{\url{#1}}
+
+% Formato de DOI
+\DeclareFieldFormat{doi}{%
+	\ifhyperref
+	{\href{https://doi.org/#1}{\nolinkurl{https://doi.org/#1}}}
+	{\nolinkurl{https://doi.org/#1}}%
+}
+
+% Ajustar formato de nombres (iniciales primero)
+\DeclareNameAlias{author}{family-given}
+
+% Configurar separación entre entradas bibliográficas
+\setlength\bibitemsep{0.5\baselineskip}
+
+% Permitir saltos de línea en la bibliografía
+\setlength{\emergencystretch}{3em}
+\setlength{\bibhang}{0pt}
+
+% Agregar archivo de referencias
+\addbibresource{bibliography/references.bib}
+
+% =====================================
+% ÍNDICES Y TÍTULOS
+% =====================================
+\usepackage{tocloft}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% =====================================
+% ÚTILES
+% =====================================
+\usepackage{comment}

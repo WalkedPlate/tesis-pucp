@@ -1,0 +1,20 @@
+# Archivos de Google Drive
+*.gdoc
+*.gsheet
+*.gslides
+desktop.ini
+
+# Ignorar la carpeta
+REVISIONES_PROPUESTAS_PDF/
+
+# Ignorar archivos generados por LaTeX 
+*.aux
+*.lof
+*.lot
+*.out
+*.log
+*.pdf
+*.synctex.gz
+*.toc
+
+

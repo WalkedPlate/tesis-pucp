@@ -1,0 +1,245 @@
+% =====================================
+% CONFIGURACIÓN DE SEPARACIÓN SILÁBICA
+% =====================================
+\usepackage[none]{hyphenat}  % Desactiva separación de palabras con guión
+\sloppy  % Permite espaciado variable para evitar corte de palabras
+
+% =====================================
+% FORMATO DE FECHA PERSONALIZADO
+% =====================================
+\usepackage[spanish]{babel}
+\usepackage{datetime}
+
+% Definir formato de fecha "Lima, mes, año"
+\newdateformat{limaFecha}{
+	Lima, \monthname[\THEMONTH], \THEYEAR
+}
+
+% =====================================
+% CONFIGURACIÓN DE ENCABEZADOS
+% =====================================
+\setlength{\headheight}{14.5pt}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[R]{\thepage}  % Números de página en minúsculas cuando sea romano
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+
+% Estilo plain para primeras páginas de capítulos - SIN NUMERACIÓN
+\fancypagestyle{plain}{%
+	\fancyhf{}  % Sin número de página
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+
+% Estilo sin numeración para dedicatoria y agradecimientos
+\fancypagestyle{unnumbered}{%
+	\fancyhf{}
+	\renewcommand{\headrulewidth}{0pt}
+	\renewcommand{\footrulewidth}{0pt}
+}
+
+% =====================================
+% NUMERACIÓN ROMANA EN PRELIMINARES
+% =====================================
+\makeatletter
+\renewcommand{\frontmatter}{%
+	\cleardoublepage
+	\@mainmatterfalse
+	\pagenumbering{roman}
+	\renewcommand{\thepage}{\roman{page}}  % Forzar minúsculas
+	\pagestyle{fancy}
+}
+\makeatother
+
+% =====================================
+% ESPACIADO INTERLINEAL (equivalente a Word)
+% =====================================
+\setstretch{2.0}  % Doble espaciado similar a Word
+
+% =====================================
+% CONFIGURACIÓN DE PÁRRAFOS
+% =====================================
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+% =====================================
+% PATH DE FIGURAS
+% =====================================
+\graphicspath{{figures/}{figures/logos/}}
+
+% =====================================
+% NOMBRES EN ESPAÑOL
+% =====================================
+\addto\captionsspanish{
+	\renewcommand{\contentsname}{ÍNDICE GENERAL}
+	\renewcommand{\listfigurename}{ÍNDICE DE FIGURAS}
+	\renewcommand{\listtablename}{ÍNDICE DE TABLAS}
+	\renewcommand{\bibname}{REFERENCIAS BIBLIOGRÁFICAS}
+}
+
+% =====================================
+% FORMATO DE TÍTULOS DE CAPÍTULOS
+% =====================================
+
+% Capítulos numerados: "Capítulo 1. Título" en la misma línea, centrado, 14pt, negrita
+% Con espacio superior de 0.32\textheight (solo para capítulos numerados)
+\titleformat{\chapter}[hang]
+{\normalfont\bfseries\centering\fontsize{14}{16.8}\selectfont}
+{Capítulo \thechapter.}{0.5em}{}
+
+\titlespacing*{\chapter}{0pt}{0.32\textheight}{20pt}
+
+% Capítulos sin número - PEGADOS ARRIBA (0pt antes del título)
+% Formato: titlespacing*{comando}{izquierda}{antes}{después}
+\titleformat{name=\chapter,numberless}[block]
+{\normalfont\bfseries\centering\fontsize{14}{16.8}\selectfont}
+{}{0pt}{}
+
+\titlespacing*{name=\chapter,numberless}{0pt}{-50pt}{20pt}
+
+% =====================================
+% FORMATO DE SECCIONES Y SUBSECCIONES
+% =====================================
+
+% Subcapítulos (secciones): 13pt, negrita, alineado a la izquierda
+\titleformat{\section}
+{\normalfont\bfseries\fontsize{13}{15.6}\selectfont}
+{\thesection}{1em}{}
+
+% Sub-subcapítulos (subsecciones): 12pt, negrita, alineado a la izquierda
+\titleformat{\subsection}
+{\normalfont\bfseries\fontsize{12}{14.4}\selectfont}
+{\thesubsection}{1em}{}
+
+% =====================================
+% CONFIGURACIÓN DEL ÍNDICE GENERAL
+% =====================================
+\usepackage{tocloft}
+
+% Hacer puntos suspensivos más densos
+\renewcommand{\cftdot}{.}
+\renewcommand{\cftdotsep}{0.32}
+
+% Puntos suspensivos para capítulos
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+
+% Quitar negrita de capítulos
+\renewcommand{\cftchapfont}{\normalfont}
+\renewcommand{\cftchappagefont}{\normalfont}
+
+% Agregar "Capítulo" antes del número en el índice
+\renewcommand{\cftchappresnum}{Capítulo }
+\renewcommand{\cftchapaftersnum}{.}
+\setlength{\cftchapnumwidth}{5em}  % Ajustar ancho para "Capítulo X."
+
+% =====================================
+% FORMATO DE TÍTULOS DE ÍNDICES
+% =====================================
+% Centrar y formatear título del índice general - ARRIBA DE LA PÁGINA
+\renewcommand{\cfttoctitlefont}{\hfill\bfseries\fontsize{14}{16.8}\selectfont}
+\renewcommand{\cftaftertoctitle}{\hfill}
+
+% Centrar y formatear título del índice de tablas - ARRIBA DE LA PÁGINA
+\renewcommand{\cftlottitlefont}{\hfill\bfseries\fontsize{14}{16.8}\selectfont}
+\renewcommand{\cftafterlottitle}{\hfill}
+
+% Centrar y formatear título del índice de figuras - ARRIBA DE LA PÁGINA
+\renewcommand{\cftloftitlefont}{\hfill\bfseries\fontsize{14}{16.8}\selectfont}
+\renewcommand{\cftafterloftitle}{\hfill}
+
+% Ajustar espaciado vertical ANTES de los títulos de índices - IGUAL QUE CAPÍTULOS SIN NÚMERO
+\setlength{\cftbeforetoctitleskip}{-20pt}
+\setlength{\cftbeforelottitleskip}{-20pt}
+\setlength{\cftbeforeloftitleskip}{-20pt}
+
+% Espaciado DESPUÉS del título (entre título y contenido)
+\setlength{\cftaftertoctitleskip}{20pt}
+\setlength{\cftafterlottitleskip}{20pt}
+\setlength{\cftafterloftitleskip}{20pt}
+
+% =====================================
+% NUMERACIÓN DE FIGURAS, TABLAS Y ECUACIONES
+% =====================================
+\numberwithin{figure}{chapter}
+\numberwithin{table}{chapter}
+\numberwithin{equation}{chapter}
+
+% =====================================
+% CONFIGURACIÓN DE ECUACIONES
+% =====================================
+% Las ecuaciones ya están configuradas con amsmath y numberwithin
+
+% =====================================
+% ÍNDICE DE ECUACIONES
+% =====================================
+\newcommand{\listequationsname}{ÍNDICE DE ECUACIONES}
+\newlistof{myequations}{equ}{\listequationsname}
+\newcommand{\myequations}[1]{%
+	\addcontentsline{equ}{myequations}{\protect\numberline{\theequation}#1}\par}
+
+% Formato del título del índice de ecuaciones - ARRIBA DE LA PÁGINA
+\renewcommand{\cftequtitlefont}{\hfill\bfseries\fontsize{14}{16.8}\selectfont}
+\renewcommand{\cftafterequtitle}{\hfill}
+\setlength{\cftbeforeequtitleskip}{-20pt}
+\setlength{\cftafterequtitleskip}{20pt}
+
+% Puntos suspensivos para ecuaciones
+\renewcommand{\cftmyequationsleader}{\cftdotfill{\cftdotsep}}
+
+% =====================================
+% FORMATO DE ÍNDICES DE TABLAS, FIGURAS Y ECUACIONES
+% =====================================
+
+% Índice de Tablas: agregar "Tabla" antes del número
+\renewcommand{\cfttabpresnum}{Tabla }
+\renewcommand{\cfttabaftersnum}{.\space}
+\setlength{\cfttabnumwidth}{5em}
+
+% Índice de Figuras: agregar "Figura" antes del número
+\renewcommand{\cftfigpresnum}{Figura }
+\renewcommand{\cftfigaftersnum}{.\space}
+\setlength{\cftfignumwidth}{5em}
+
+% Índice de Ecuaciones: agregar "Ecuación" antes del número
+\renewcommand{\cftmyequationspresnum}{Ecuación }
+\renewcommand{\cftmyequationsaftersnum}{.\space}
+\setlength{\cftmyequationsnumwidth}{6em}
+
+% =====================================
+% FORMATO DE CAPTIONS (TABLAS Y FIGURAS)
+% =====================================
+\usepackage{caption}
+
+% Configuración para tablas: fuente más pequeña e itálica
+\captionsetup[table]{
+	font={small,it},
+	labelfont={small,bf},
+	skip=10pt
+}
+
+% Configuración para figuras: fuente más pequeña e itálica
+\captionsetup[figure]{
+	font={small,it},
+	labelfont={small,bf},
+	skip=10pt
+}
+
+% =====================================
+% FORMATO ESPECIAL PARA SECCIONES FINALES
+% =====================================
+\newcommand{\setupbackmatter}{%
+	% Conclusiones y Referencias: título centrado, sin número, arriba con -20pt
+	\titleformat{\chapter}[block]
+	{\normalfont\bfseries\centering\fontsize{14}{16.8}\selectfont}
+	{}{0pt}{}
+	
+	\titlespacing*{\chapter}{0pt}{-20pt}{20pt}
+	
+	\titleformat{name=\chapter,numberless}[block]
+	{\normalfont\bfseries\centering\fontsize{14}{16.8}\selectfont}
+	{}{0pt}{}
+	
+	\titlespacing*{name=\chapter,numberless}{0pt}{-20pt}{20pt}
+}

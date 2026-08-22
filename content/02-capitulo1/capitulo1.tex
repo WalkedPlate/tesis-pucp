@@ -1,0 +1,292 @@
+\chapter{Planteamiento del Problema}
+\label{chap:planteamiento}
+
+Este capítulo caracteriza la dificultad para la experimentación práctica con \textit{network slicing} 5G en entornos académicos. Se identifica una brecha de accesibilidad entre las soluciones comerciales, caracterizadas por su alto costo y limitada transparencia técnica, y las alternativas \textit{open-source} de grado operador, de elevada complejidad operacional. El capítulo establece el área académica del proyecto, analiza estas brechas, y define los objetivos y alcances que enmarcan el desarrollo de este trabajo.
+
+\newpage
+
+
+\section{Área Académica y Contexto}
+
+\subsection{Área Académica de la Ingeniería de Telecomunicación}
+
+El presente trabajo se inscribe en el área académica de Redes, Sistemas y Servicios Móviles, dominio dedicado a planificar y optimizar la conectividad y servicios en redes celulares. Esta área abarca el diseño, implementación y gestión de infraestructuras de comunicaciones móviles, desde redes de generaciones anteriores hasta las arquitecturas 5G contemporáneas.
+
+Esta tesis pertenece a dicha área porque aborda uno de sus desafíos contemporáneos fundamentales: la experimentación práctica con tecnologías habilitadoras de redes móviles de quinta generación. Específicamente, el proyecto se centra en el \textit{network slicing}, una capacidad fundamental de 5G definida por 3GPP (\textit{3rd Generation Partnership Project}) que permite crear múltiples redes lógicas independientes sobre infraestructura física compartida \cite{3GPP2018}. El \textit{network slicing} representa uno de los pilares arquitectónicos que distinguen a 5G de generaciones anteriores, permitiendo que las redes móviles soporten casos de uso diversos con requisitos heterogéneos de calidad de servicio \cite{Popovski2018,Foukas2017}. Además, el proyecto aborda la orquestación y gestión del ciclo de vida de estos \textit{slices} en el contexto del 5G \textit{Core Network}, componente central de la arquitectura de sistemas móviles 5G \textit{Standalone}, consolidando su pertenencia al dominio de redes, sistemas y servicios móviles.
+
+\subsection{Caracterización de la Problemática}
+
+\subsubsection*{Contexto del \textit{Network Slicing} en 5G}
+
+El \textit{network slicing} es una de las capacidades habilitadoras fundamentales de las redes 5G, definido por 3GPP como la creación de múltiples redes lógicas independientes (\textit{slices}) sobre una infraestructura física compartida \cite{3GPP2018}. A diferencia de generaciones anteriores de redes móviles que proporcionaban conectividad homogénea, el \textit{network slicing} permite que una infraestructura de red compartida soporte simultáneamente servicios con requisitos diferentes de calidad de servicio, desde \textit{streaming} de video de ultra alta definición hasta control industrial en tiempo real \cite{Popovski2018,Foukas2017}.
+
+3GPP define tres categorías principales de \textit{slices}, caracterizados por el SST (\textit{Service and Slice Type}), cada uno optimizado para diferentes casos de uso y verticales industriales \cite{3GPP2018,Saboorian2017}
+. La Tabla \ref{tab:slices-caracteristicas} resume las características fundamentales de estos tipos de \textit{slice}.
+
+
+{\footnotesize
+	\renewcommand{\arraystretch}{0.95}
+	\begin{spacing}{1.55}
+		
+		\begin{table}[H]
+			\centering
+			\caption{Características de tipos de \textit{network slices} 5G según especificaciones 3GPP}
+			\label{tab:slices-caracteristicas}
+			
+			\begin{tabularx}{\textwidth}{|l|c|X|c|c|}
+				\hline
+%				\rowcolor{lightgray}
+				\textbf{Tipo de} & \textbf{SST} & \textbf{Casos de Uso} & \textbf{Latencia} & \textbf{Throughput} \\
+				\textbf{Slice} & \textbf{Value} & \textbf{Principales} & & \\
+				\hline
+				eMBB & 1 & Video 4K/8K, realidad virtual, \textit{cloud gaming} & $<$ 100 ms & Muy alto (1+ Gbps) \\
+				\hline
+				URLLC & 2 & Cirugía remota, vehículos autónomos, control industrial & $\approx$ 1 ms & Moderado (10-100 Mbps) \\
+				\hline
+				mMTC & 3 & Sensores IoT distribuidos, \textit{smart cities}, agricultura inteligente & Decenas--cientos ms  & Bajo ($<$ 1 Mbps) \\
+				\hline
+			\end{tabularx}
+			
+			\vspace{0.3cm}
+			\small Fuente: Elaboración propia basada en \cite{Popovski2018,3GPP2018}
+		\end{table}
+		
+	\end{spacing}
+}
+
+La implementación de \textit{network slicing} requiere mecanismos de diferenciación en múltiples planos de la arquitectura de red: el núcleo de red (5G \textit{Core}), el transporte, y la RAN. En el plano del \textit{core} de red, la diferenciación se materializa mediante políticas de QoS, aislamiento de recursos computacionales y de red, y gestión independiente del ciclo de vida de cada \textit{slice} \cite{Foukas2017,3GPP2018}. La Figura \ref{fig:slices-casos-uso} ilustra la arquitectura de \textit{network slicing} 5G, mostrando cómo los tres tipos de \textit{slices} (eMBB, mMTC, URLLC) se despliegan sobre una infraestructura compartida de RAN y son orquestados a través de C-RAN para servir diferentes aplicaciones con requisitos heterogéneos.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{/chapter1/malta2024-fig1.jpg}
+	\caption{Panorama de \textit{network slicing} 5G mostrando los tres tipos de \textit{slices}}
+	\label{fig:slices-casos-uso}
+	
+	\vspace{0.3cm}
+	\small Fuente: Tomado de \cite{Malta2024}
+\end{figure}
+
+\subsubsection*{Brecha de Accesibilidad Tecnológica}
+
+La experimentación práctica con \textit{network slicing} 5G es fundamental para la formación de profesionales en telecomunicaciones, sin embargo, esta se ve  obstaculizada por barreras de accesibilidad que afectan particularmente a instituciones educativas. Las soluciones de orquestación de \textit{network slicing} de grado operador, desarrolladas por fabricantes de equipamiento de telecomunicaciones (Ericsson Orchestrator, Nokia NetAct, Huawei iMaster), son sistemas propietarios diseñados para redes de producción de operadores móviles que presentan múltiples barreras para uso académico.
+
+Estas plataformas comerciales involucran costos de licenciamiento significativos, además de requerir contratos de soporte técnico y actualizaciones, lo cual excluye su uso en contextos educativos con presupuestos limitados. Su arquitectura de caja negra, donde los mecanismos internos de diferenciación de QoS y orquestación no son inspeccionables, limita significativamente su valor pedagógico. 
+Adicionalmente, están diseñadas para interoperar con equipamiento propietario del mismo fabricante, dificultando su uso con componentes \textit{open-source} o \textit{multi-vendor}, y frecuentemente incluyen restricciones de licenciamiento que excluyen propósitos educativos o de investigación no comercial.
+
+\subsubsection*{Brecha de Complejidad Operacional}
+
+Una alternativa aparentemente viable son las plataformas de orquestación \textit{open-source} de grado operador, que si bien son técnicamente accesibles sin costos de licenciamiento, presentan una complejidad arquitectónica que excede las capacidades operacionales de entornos académicos típicos. Estudios recientes han documentado sistemáticamente esta complejidad \cite{Yilma2020, Trakadas2020}.
+
+ONAP (\textit{Open Network Automation Platform}) representa el caso extremo de complejidad: está compuesto por 20 módulos funcionales implementados como múltiples microservicios interdependientes, requiere infraestructura de OpenStack, y su despliegue inicial toma varios días incluso para usuarios experimentados \cite{Yilma2020}. Por otro lado, OSM (\textit{Open Source MANO}), aunque considerado más ligero, mantiene una complejidad significativa derivada de su adopción del \textit{framework} ETSI NFV MANO, con múltiples capas de abstracción (VIM, VNFM, NFVO) y la necesidad de dominar descriptores complejos en formato YAML/TOSCA \cite{Trakadas2020,Yilma2020}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{/chapter1/trakadas2020-fig1.png}
+	\caption[Arquitectura ETSI NFV MANO]{Arquitectura ETSI NFV MANO}
+	\label{fig:etsi-mano-arch}
+	
+	\vspace{0.3cm}
+	\small Fuente: Tomado de Trakadas et al. \cite{Trakadas2020}
+\end{figure}
+
+La Figura \ref{fig:etsi-mano-arch} ilustra la separación de responsabilidades en el marco ETSI NFV MANO. Si bien esta arquitectura es robusta para entornos de producción heterogéneos, impone una carga cognitiva y operacional considerable que desvía el foco del aprendizaje de los conceptos fundamentales de 5G hacia la administración de la propia plataforma de orquestación. Esta orientación a entornos de producción introduce requisitos operacionales que dificultan su adopción en laboratorios académicos con recursos limitados.
+
+Estas barreras de complejidad, sumadas a las restricciones económicas previamente descritas, configuran un escenario que demanda soluciones alternativas diseñadas específicamente para contextos educativos.
+
+\subsubsection*{Necesidad de Soluciones Educativas}
+
+Las brechas de accesibilidad económica y complejidad operacional descritas en las secciones anteriores limitan la experimentación práctica con \textit{network slicing} 5G en entornos educativos. La Tabla \ref{tab:comparacion-soluciones-existentes} sintetiza las características de las soluciones comerciales y \textit{open-source} de grado operador, evidenciando su inadecuación para contextos académicos con recursos limitados.
+
+{\footnotesize
+	\renewcommand{\arraystretch}{0.95}
+	\begin{spacing}{1.55}
+		
+		\begin{table}[H]
+			\centering
+			\caption{Comparación de soluciones existentes de \textit{network slicing} 5G}
+			\label{tab:comparacion-soluciones-existentes}
+			
+			\renewcommand{\arraystretch}{1.2}
+			\setlength{\tabcolsep}{6pt}
+			
+			\begin{tabularx}{\textwidth}{|p{4.5cm}|p{4.5cm}|X|}
+				\hline
+				
+%				\rowcolor{lightgray}
+				\textbf{Característica} 
+				& \textbf{Soluciones comerciales} 
+				& \textbf{Plataformas open-source (ONAP/OSM)} \\
+				\hline
+				
+				Costo inicial 
+				& Alto (licencias, soporte técnico) 
+				& Gratuito (código abierto) \\
+				\hline
+				
+				Hardware requerido 
+				& Propietario / grado operador 
+				& 2--88 vCPUs (OSM--ONAP) \\
+				\hline
+				
+				RAM requerida 
+				& Propietario / grado operador 
+				& 8--176 GB (OSM--ONAP) \\
+				\hline
+				
+				Complejidad de despliegue 
+				& Muy alta (días/semanas) 
+				& Media--Alta (horas--días) \\
+				\hline
+				
+				Transparencia técnica 
+				& Caja negra (propietario) 
+				& Alta (código abierto) pero complejidad arquitectónica elevada \\
+				\hline
+				
+				Propósito de diseño 
+				& Redes de producción comercial 
+				& Operadores con equipos especializados \\
+				\hline
+				
+				Curva de aprendizaje 
+				& Muy alta (requiere capacitación del fabricante) 
+				& Alta (requiere conocimiento profundo de NFV MANO) \\
+				\hline
+				
+				Idoneidad para educación 
+				& Baja (costo, opacidad) 
+				& Media (complejidad operacional) \\
+				\hline
+				
+			\end{tabularx}
+			
+			\vspace{0.2cm}
+			{\small \textit{Fuente: Elaboración propia. Datos cuantitativos de ONAP y OSM basados en \cite{Yilma2020}. Características de soluciones comerciales basadas en \cite{Nokia2025,Ericsson2025}.}}
+		\end{table}
+		
+	\end{spacing}
+}
+
+
+La democratización de la experimentación en redes 5G es una necesidad creciente documentada en la literatura reciente. La revisión sistemática de Esmaeily y Kralevska señala que, tradicionalmente, solo los operadores de red y los grandes fabricantes tenían acceso a la experimentación práctica debido a los sistemas propietarios y las restricciones de licenciamiento. Por ello, existe una necesidad documentada de bancos de pruebas de bajo costo y pequeña escala que sean apropiados para los entornos de investigación universitarios \cite{Esmaeily2021}.
+
+Mamushiane et al. refuerzan este punto al notar que las barreras de costo y complejidad para desplegar redes 5G Standalone (SA) afectan particularmente a regiones e instituciones con menos recursos, limitando el acceso a una educación práctica en tecnologías avanzadas \cite{Mamushiane2023}. La investigación sobre la efectividad de los laboratorios en la educación de ingeniería ha demostrado que la integración de laboratorios físicos tradicionales puede verse obstaculizada por factores como los costos de equipamiento, las restricciones de tiempo y los requisitos de infraestructura \cite{Li2024}.
+
+Existe, por tanto, una brecha evidente entre el contenido teórico de los cursos de redes móviles y la capacidad de los estudiantes para obtener experiencia práctica. Esta limitación en la formación de nuevos profesionales se debe tanto a las barreras de acceso a equipos reales \cite{Mamushiane2023} como a la falta de herramientas que permitan una interacción remota y realista, un pilar del nuevo paradigma de ``Educación 4.0'' \cite{Kizilkaya2021}. 
+
+Frente a este panorama, se identifica la oportunidad de desarrollar una plataforma que equilibre tres aspectos críticos: realismo técnico suficiente para implementar los mecanismos fundamentales de \textit{network slicing} de manera funcionalmente equivalente a sistemas de producción; simplicidad operacional que permita que el foco esté en los conceptos de 5G y no en la administración de infraestructura compleja; y transparencia de mecanismos, exponiendo directamente las primitivas técnicas que materializan la diferenciación de \textit{slices} en lugar de ocultarlas tras capas de abstracción. La siguiente sección presenta la visión técnica de esta solución y sus impactos esperados.
+
+
+\subsection{Visión de la Solución y sus Impactos}
+
+\subsubsection*{Enfoque Técnico}
+
+La plataforma se fundamentará en la integración de componentes \textit{open-source} de 5G (como Open5GS para el \textit{core} 5G \textit{standalone} y UERANSIM como simulador de RAN y UE) con tecnologías estándar de orquestación \textit{cloud-native} (como Kubernetes). A diferencia de las plataformas de grado operador, que priorizan una exhaustiva completitud funcional y el soporte \textit{multi-vendor}, esta solución se enfocará deliberadamente en los mecanismos esenciales del \textit{network slicing}. El diseño primará la simplicidad operacional y la visibilidad de los mecanismos, exponiendo directamente las primitivas técnicas que materializan la diferenciación entre \textit{slices}, en lugar de ocultarlas tras complejas capas de abstracción.
+
+\subsubsection*{Impactos Técnicos Esperados}
+
+La validación técnica del proyecto incluirá experimentos para demostrar el aislamiento de rendimiento entre \textit{slices} concurrentes que emulen distintos tipos de servicio (e.g., eMBB y URLLC). Se cuantificará la efectividad de los mecanismos de diferenciación mediante métricas observables como el \textit{throughput}, la latencia y la utilización de recursos. El objetivo es demostrar que es posible lograr una diferenciación funcional entre \textit{slices} utilizando únicamente mecanismos nativos de Kubernetes y su ecosistema, sin incurrir en la complejidad arquitectónica de las plataformas de grado operador. 
+
+\subsubsection*{Impactos Educativos y Sociales}
+
+El impacto educativo primario es habilitar la experimentación práctica con \textit{network slicing} en instituciones que actualmente carecen de acceso a esta tecnología. Los estudiantes podrán realizar laboratorios donde observen y midan directamente el comportamiento de \textit{slices} concurrentes, examinen las configuraciones de Kubernetes que materializan las políticas de QoS y experimenten con el ciclo de vida de las \textit{slices} en un entorno seguro.
+
+
+Esta transparencia de mecanismos fomenta un aprendizaje más profundo que el ofrecido por soluciones de con opacidad técnica, contribuyendo a cerrar la brecha entre el contenido teórico de los cursos de redes móviles y la experiencia práctica. Esto es fundamental para la formación de profesionales mejor preparados para los desafíos de la industria de telecomunicaciones.
+
+El impacto social más amplio reside en la democratización del acceso a la educación tecnológica avanzada. Al hacer la experimentación con 5G más accesible, utilizando componentes \textit{open-source} y con requisitos de hardware moderados, la plataforma puede contribuir a reducir la brecha digital entre instituciones con diferentes niveles de recursos. Este enfoque es particularmente relevante en contextos donde el acceso a tecnologías de punta es limitado, como se ha documentado en regiones como África, donde el alto costo de la infraestructura ha ralentizado la adopción de 5G SA.
+
+%\subsubsection*{Replicabilidad y Sostenibilidad}
+%
+%La solución completa será documentada y empaquetada para facilitar su adopción por otras instituciones educativas. Al basarse completamente en componentes \textit{open-source} sin costos de licenciamiento y con requisitos de hardware accesibles, se espera que la plataforma sea sostenible a largo plazo sin dependencia de presupuestos extraordinarios o infraestructura especializada. La naturaleza modular del diseño permitirá futuras extensiones por parte de investigadores que deseen experimentar con algoritmos de orquestación alternativos, nuevos tipos de \textit{slice}, o integración con componentes adicionales.
+
+\section{Objetivos de la Tesis}
+
+\subsection{Objetivo General}
+
+Diseñar e implementar una plataforma de orquestación de \textit{network slicing} 5G basada en componentes \textit{open-source}, que facilite la experimentación educativa con mecanismos de diferenciación de calidad de servicio.
+
+\subsection{Objetivos Específicos}
+
+\textbf{Diseñar e implementar la plataforma de orquestación}
+
+Diseñar la arquitectura de integración entre Open5GS y Kubernetes, e implementar un módulo orquestador que permita crear y eliminar \textit{slices} de red mediante la generación automática de configuraciones de Kubernetes.
+
+\textbf{Implementar mecanismos de diferenciación de calidad de servicio}
+
+Configurar mecanismos para diferenciar \textit{slices} de tipo eMBB y URLLC mediante control de recursos computacionales, gestión de ancho de banda, y aislamiento lógico, e implementar una interfaz web para gestionar \textit{slices}.
+
+\textbf{Validar experimentalmente la diferenciación entre \textit{slices}}
+
+Ejecutar experimentos que midan \textit{throughput}, latencia y utilización de recursos en \textit{slices} concurrentes, documentando los niveles de diferenciación de QoS logrados.
+
+\section{Alcances y Limitaciones}
+
+\subsection{Alcances}
+
+La tesis presenta una plataforma de orquestación de \textit{network slicing} 5G con funcionalidades orientadas a la experimentación educativa. La plataforma permite gestionar el ciclo de vida de los \textit{network slices} a través de una interfaz web, incluyendo operaciones de creación, configuración, monitoreo básico y eliminación. La diferenciación de calidad de servicio se implementa a nivel del \textit{5G Core}, específicamente en la función de plano de usuario (\textit{User Plane Function}), soportando dos tipos de \textit{slice}: eMBB y URLLC.
+
+La validación del sistema incluye experimentos para la medición de \textit{throughput}, latencia y utilización de recursos en \textit{slices} concurrentes.
+
+El resultado obtenido es una plataforma funcional que permite la gestión y experimentación de \textit{network slices} 5G, junto con la documentación de los experimentos de validación y las métricas cuantitativas. La orquestación de los componentes se realiza sobre un entorno \textit{Kubernetes}, lo que permite una gestión modular y escalable de los servicios involucrados.
+
+\subsection{Limitaciones}
+
+La diferenciación de \textit{slicing} se limita exclusivamente al \textit{5G Core}. Todos los \textit{slices} comparten la misma RAN simulada, sin aplicación de \textit{slicing} a nivel del \textit{gNodeB}. Se emplea un entorno de simulación de RAN y UE, sin integración con equipamiento de radiofrecuencia real ni con hardware \textit{Software-Defined Radio} (SDR).
+
+La plataforma opera dentro de un único dominio administrativo, sin interfaces de federación \textit{multi-operador} ni soporte para \textit{slice roaming}. El dimensionamiento de recursos es manual, sin implementación de mecanismos automáticos de \textit{auto-scaling}. El sistema se despliega sobre un único clúster de \textit{Kubernetes}, sin soporte \textit{multi-VIM} ni despliegues distribuidos.
+
+Los componentes del \textit{Core} 5G se implementan en configuración básica, sin redundancia ni alta disponibilidad. La autenticación es simplificada, sin soporte de \textit{multi-tenancy} completo. Los experimentos se ejecutaron en entornos controlados de laboratorio, sin contemplar pruebas de carga masiva ni escenarios de operación a gran escala.
+
+Estas limitaciones permitieron enfocar el desarrollo en la correcta implementación de los mecanismos fundamentales de \textit{network slicing} en el \textit{5G Core} y en la demostración de la diferenciación de calidad de servicio (\textit{QoS}) mediante experimentación.
+\section{Beneficiarios de la Solución}
+
+\subsection{Beneficiarios Directos}
+
+Los beneficiarios directos incluyen estudiantes de ingeniería de telecomunicaciones en pregrado y posgrado que cursen asignaturas relacionadas con redes móviles o tecnologías 5G, quienes podrán realizar prácticas de laboratorio sobre \textit{network slicing} y observar mecanismos de diferenciación de QoS. Los docentes de cursos de redes móviles o arquitecturas 5G podrán incorporar la plataforma en actividades prácticas de laboratorio, complementando contenido teórico con experimentación directa. Investigadores en etapas iniciales, particularmente estudiantes de posgrado, podrán utilizar la plataforma como \textit{testbed} funcional para ejecutar experimentos o validar propuestas sin necesidad de construir la infraestructura completa desde cero.
+
+\subsection{Beneficiarios Indirectos}
+
+Las instituciones educativas, especialmente universidades e institutos técnicos con presupuestos limitados, podrán ofrecer prácticas de laboratorio en tecnologías 5G sin requerir inversiones en equipamiento comercial o licencias propietarias. La comunidad académica más amplia se beneficiará al poder utilizar, adaptar o extender la plataforma dado que estará documentada y empaquetada como código abierto. El sector de telecomunicaciones se beneficia potencialmente de profesionales con experiencia práctica en \textit{network slicing}, aunque el impacto de una única plataforma educativa en el mercado laboral es limitado y difícil de cuantificar.
+
+\section{Consideraciones No Técnicas}
+
+Si bien el núcleo de este trabajo es técnico, su naturaleza educativa y su potencial impacto en la democratización del acceso a tecnologías 5G requieren considerar dimensiones adicionales que enmarcan el desarrollo responsable y socialmente consciente de la plataforma.
+
+\subsection{Aspectos Legales y Regulatorios}
+
+La plataforma se basa en componentes \textit{open-source} con licencias que permiten uso educativo: Open5GS bajo licencia AGPLv3, UERANSIM bajo GPLv3, y Kubernetes y Cilium bajo licencia Apache 2.0. No existen restricciones legales para su uso en laboratorios académicos. Al utilizar simulación sin emisión de radiofrecuencia real, no se requieren permisos de uso de espectro radioeléctrico por parte de autoridades regulatorias.
+
+\subsection{Aspectos Éticos}
+
+El proyecto reduce barreras económicas para acceso a experimentación práctica en tecnologías 5G. La transparencia de componentes \textit{open-source} permite inspección de mecanismos técnicos, facilitando aprendizaje más profundo que soluciones propietarias en donde existe opacidad técnica. La plataforma debe utilizarse exclusivamente en entornos controlados de laboratorio para propósitos educativos.
+
+\subsection{Aspectos Sociales}
+
+La plataforma puede contribuir a reducir disparidades en acceso a educación práctica de tecnologías avanzadas entre instituciones con diferentes niveles de recursos. Esto es particularmente relevante en contextos donde infraestructura de telecomunicaciones de última generación es limitada o inaccesible para propósitos educativos.
+
+%\subsection{Aspectos Económicos}
+%
+%El costo principal corresponde a hardware de servidor, estimado entre \$2,000 y \$5,000 USD para una configuración adecuada, significativamente menor que licencias de soluciones comerciales. El software es gratuito al ser \textit{open-source}. Los costos operacionales se limitan a consumo eléctrico y mantenimiento básico del sistema.
+
+\subsection{Aspectos Ambientales}
+
+El uso de virtualización y contenedores permite consolidación de servicios en menos hardware físico, resultando en menor consumo energético que mantener múltiples servidores físicos dedicados. La plataforma puede ejecutarse en hardware de servidor estándar existente, permitiendo reutilización de equipamiento disponible en laboratorios.
+
+\subsection{Bien Común}
+
+La publicación de la implementación contribuye al conocimiento público sobre implementaciones prácticas de \textit{network slicing} 5G. Esto beneficia a la comunidad académica al proporcionar un caso de estudio y punto de partida para futuras investigaciones o adaptaciones en otros contextos educativos.
+
+\section{Motivación Personal}
+
+El interés en esta investigación surge de la convergencia entre motivaciones técnicas y formativas. Durante la formación académica del autor, los cursos de redes móviles generaron entusiasmo por las nuevas capacidades ofrecidas por 5G con respecto a 4G, particularmente el network slicing como mecanismo de diferenciación de servicios. 
+
+Adicionalmente, el trabajo permite profundizar en áreas técnicas de gran interés personal como la orquestación de contenedores con Kubernetes, implementaciones cloud-native de funciones de red, y la intersección entre virtualización de redes y diferenciación de calidad de servicio. La naturaleza integradora de la tesis, que requiere combinar conceptos de redes móviles, sistemas distribuidos y desarrollo de software, constituye un desafío técnico formativo fundamental para el desarrollo profesional.
+
+\section{Reflexión Final del Capítulo}
+
+Este capítulo ha caracterizado el desafío de ingeniería que motiva el presente trabajo: la brecha entre la relevancia pedagógica del \textit{network slicing} 5G y las barreras de accesibilidad que limitan su experimentación práctica en entornos académicos. Se han identificado dos brechas fundamentales: la inaccesibilidad económica y opacidad técnica de soluciones comerciales, y la complejidad operacional desfavorable de plataformas \textit{open-source} de grado operador.
+
+El análisis presentado fundamenta la necesidad de desarrollar una plataforma que equilibre realismo técnico, simplicidad operacional y transparencia de mecanismos. Los objetivos y alcances definidos delimitan un proyecto técnicamente viable que prioriza la implementación correcta de mecanismos fundamentales sobre la replicación exhaustiva de funcionalidades empresariales.
+
+Con el problema caracterizado y la visión de solución establecida, el siguiente capítulo abordará el estado del arte y los fundamentos teóricos que soportarán el diseño técnico de la plataforma.
