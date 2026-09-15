@@ -1,535 +1,441 @@
-\chapter{Marco teórico y revisión sistemática de literatura}
+\chapter{Fundamentos técnicos, revisión sistemática y bases analíticas de la realizabilidad de políticas de seguridad en el núcleo de red 5G}
+\label{cap:fundamento-revision}
 
-El presente capítulo establece los fundamentos teóricos y metodológicos que sustentan el diseño de la plataforma educativa para la orquestación de \textit{network slicing} 5G sobre una red privada \textit{cloud-native}. En primer lugar, se presentan los conceptos esenciales relacionados con el núcleo 5G \textit{Standalone} (5GC SA), el \textit{network slicing} en el plano del núcleo y las tecnologías \textit{cloud-native} relevantes, con énfasis en Kubernetes y en los mecanismos de diferenciación de recursos que serán empleados en este trabajo. A continuación, se describe la metodología de revisión sistemática de literatura aplicada, así como los principales resultados obtenidos y su síntesis en forma de estado del arte. Finalmente, se derivan criterios de diseño a partir de dicha literatura y se formulan las métricas cuantitativas que se utilizarán en la evaluación experimental de la plataforma.
+Este capítulo desarrolla los conceptos necesarios para estudiar la aplicación de políticas de seguridad en el núcleo 5G basado en servicios y presenta la evidencia que orienta la propuesta. El problema se analiza desde la \textit{enforceability}, denominada realizabilidad en esta tesis: la capacidad de un punto de ejecución de políticas (\textit{Policy Enforcement Point}, PEP) para permitir o impedir una petición de acuerdo con un \textit{intent} de contención selectiva. Esta propiedad se evalúa respecto de un PEP concreto y no equivale a disponibilidad del servicio ni a entrega exitosa de la petición.
 
-\section{Fundamentos teóricos}
-\label{sec:fundamentos-teoricos}
+Primero se explican la arquitectura SBA, el proceso de selección de funciones, los conceptos de política y PEP, y los niveles de observación disponibles en un entorno \textit{cloud-native} (Sección~\ref{sec:fundamentos}). Después se presenta el método de la revisión sistemática (Sección~\ref{sec:rsl}) y se organizan sus hallazgos (Sección~\ref{sec:estado-arte}). Las Secciones~\ref{sec:criterios-diseno} y~\ref{sec:bases-formales} traducen la evidencia en decisiones experimentales, las bases formales del análisis y métricas de validación. La Sección~\ref{sec:cierre-cap2} cierra el capítulo con los resultados que pasan al diseño de la solución.
 
-Esta sección presenta el marco conceptual necesario para comprender el diseño y la implementación de la plataforma propuesta. Se introduce la arquitectura del núcleo 5G \textit{Standalone}, el papel del \textit{network slicing} específicamente en el núcleo de red, los principios de orquestación \textit{cloud-native} con Kubernetes y los mecanismos nativos de diferenciación de recursos. Finalmente, se integran estos elementos en una visión conceptual de la integración Open5GS--Kubernetes orientada a fines educativos.
+\section{Fundamentos conceptuales y tecnológicos}
+\label{sec:fundamentos}
 
-\subsection{Núcleo 5G Standalone y funciones principales}
-\label{subsec:5gc-funciones}
+\subsection{Núcleo 5G y arquitectura basada en servicios}
+\label{subsec:fundamentos-sba}
 
-Las redes móviles de quinta generación se apoyan en una arquitectura de núcleo (\textit{Core Network}, CN) significativamente distinta a la de generaciones previas. En el escenario \textit{Standalone}, el núcleo 5G (5GC) no depende de elementos de 4G LTE, sino que implementa de forma nativa una arquitectura basada en servicios (\textit{Service-Based Architecture}, SBA) definida por 3GPP~\cite{3GPP2018}. En esta arquitectura, las funciones de red del núcleo (\textit{Network Functions}, NFs) se exponen a través de interfaces estandarizadas basadas en servicios, típicamente sobre HTTP/\textsc{2} y JSON, facilitando su desagregación, virtualización y despliegue en entornos \textit{cloud-native}.
+El 5G Core coordina el acceso, la movilidad, las sesiones de datos, las políticas y el transporte del tráfico de usuario. En la arquitectura basada en servicios (\textit{Service-Based Architecture}, SBA), varias de estas capacidades se implementan como funciones de red (\textit{Network Functions}, NF) que ofrecen y consumen servicios mediante interfaces bien definidas~\cite{ETSI_TS_123501_R16,ETSI_TS_129500_R16}. Una NF actúa como consumidora cuando inicia una operación y como productora cuando atiende la petición. La relación depende de cada intercambio, por lo que una misma NF puede asumir ambos papeles en momentos distintos.
 
-Las funciones principales del 5GC SA pueden agruparse de manera simplificada en dos planos: el plano de control y el plano de usuario. El plano de control incluye, entre otras, las siguientes funciones~\cite{3GPP2018,Foukas2017}:
-\begin{itemize}
-	\item \textbf{Access and Mobility Management Function (AMF):} Gestiona el registro de los equipos de usuario (UE), la movilidad y el establecimiento inicial de sesiones.
-	\item \textbf{Session Management Function (SMF):} Configura y gestiona las sesiones de datos (PDU sessions), incluyendo la selección de la UPF y la asignación de direcciones IP.
-	\item \textbf{Policy Control Function (PCF):} Aplica políticas de control de servicio y de QoS, coordinando con las funciones de sesión para seleccionar reglas de tratamiento de tráfico.
-	\item \textbf{Network Repository Function (NRF):} Mantiene un registro de las funciones de red disponibles y permite que se descubran entre sí en la arquitectura SBA.
-\end{itemize}
+Entre las funciones relevantes se encuentran la AMF, responsable de aspectos de acceso y movilidad; la SMF, que administra sesiones; la PCF, que proporciona decisiones de política; y la NRF, que mantiene perfiles de las NF disponibles y permite descubrir servicios. La UPF procesa el plano de usuario, mientras que esta tesis se concentra en las comunicaciones de servicio del plano de control. El SCP no reemplaza a las funciones anteriores: actúa como intermediario de señalización y puede participar en el enrutamiento, el descubrimiento delegado o la selección, según el modelo de comunicación empleado~\cite{ETSI_TS_123501_R16}.
 
-El plano de usuario está dominado por la \textbf{User Plane Function (UPF)}, encargada del encaminamiento y reenvío de tráfico de usuario entre la red de acceso y las redes de datos externas (\textit{Data Networks}, DN). La UPF aplica políticas de encaminamiento, filtrado y, en algunos casos, modelado de tráfico o marcado de QoS~\cite{Foukas2017}. La separación explícita entre plano de control y plano de usuario, heredada del diseño CUPS de EPC y reforzada en 5GC, habilita una mayor flexibilidad en el escalamiento y la colocación de funciones de red, particularmente relevante en despliegues \textit{cloud-native}.
+\begin{table}[H]
+    \centering
+    \caption{Elementos principales relacionados con el problema de investigación}
+    \label{tab:elementos-fundamentales}
+    \small
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}
+        >{\raggedright\arraybackslash}p{2.0cm}
+        >{\raggedright\arraybackslash}p{4.2cm}
+        >{\raggedright\arraybackslash}X@{}}
+        \toprule
+        Elemento & Función general & Relación con la tesis \\
+        \midrule
+        NF consumidora & Inicia una operación de servicio & Es uno de los discriminadores posibles de una política selectiva \\
+        NF productora & Atiende la operación solicitada & Su identidad puede depender de descubrimiento, selección o \textit{binding} \\
+        NRF & Registra perfiles y permite descubrir NF o servicios & Proporciona candidatos, pero no garantiza que el PEP conozca el destino finalmente utilizado \\
+        SCP & Intermedia comunicaciones SBA & Puede modificar el trayecto y concentrar parte del contexto de selección o enrutamiento \\
+        PCF & Proporciona decisiones y reglas de política para procedimientos 5G & No sustituye al PEP que debe observar la petición y ejecutar una acción concreta \\
+        PEP & Evalúa los datos disponibles y aplica la acción preventiva & Su ubicación, capa y observables delimitan la realizabilidad de la política \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia con base en la arquitectura SBA de 3GPP~\cite{ETSI_TS_123501_R16,ETSI_TS_129500_R16}.}
+    \end{singlespace}
+\end{table}
 
-En el contexto de este trabajo, la atención se centra en aquellas funciones del 5GC que se implementan de forma directa mediante software \textit{open-source} y que pueden ser desplegadas como servicios en contenedores. AMF, SMF y UPF constituyen el núcleo mínimo sobre el cual se materializan los mecanismos de diferenciación entre \textit{slices} en el plano del núcleo, mientras que funciones como PCF y NRF, si bien relevantes, pueden tratarse con una granularidad conceptual acorde a los objetivos educativos de la plataforma.
+\subsection{Descubrimiento, selección e intermediación}
+\label{subsec:fundamentos-seleccion}
 
-% Figura:
+El descubrimiento obtiene las instancias que pueden ofrecer un servicio; la selección elige una alternativa concreta para una petición. El \textit{binding} conserva una asociación necesaria para operaciones posteriores relacionadas con una sesión o un recurso, mientras que la reselección cambia la instancia utilizada cuando las condiciones del procedimiento lo requieren. Estas etapas no deben tratarse como sinónimos: cada una materializa información en un momento distinto y esa diferencia afecta los atributos disponibles para decidir una política.
+
+3GPP contempla comunicación directa entre NF y comunicación indirecta mediante un SCP~\cite{ETSI_TS_123501_R16}. En el trayecto indirecto, el consumidor puede entregar al proxy una petición sin destino específico o incluir información de una instancia ya seleccionada. Cuando el descubrimiento es delegado, el SCP puede consultar la NRF y escoger el productor. Si la instancia fue seleccionada antes, la petición puede transportar información de destino, como \texttt{3gpp-Sbi-Target-apiRoot}~\cite{ETSI_TS_129500_R16}. Por ello, la denominación general del modelo de comunicación no basta para saber qué identidad existe en el instante de decisión.
+
+La Figura~\ref{fig:problema-contencion-selectiva} introdujo los dos puntos de observación considerados en el trayecto indirecto. En esta sección, esa relación se precisa mediante el estado de la petición: el PEP anterior al SCP sólo puede usar la identidad productora si ya está materializada y visible, mientras que el PEP posterior actúa después de la selección, pero debe comprobar qué información del consumidor conserva y con qué procedencia.
+
+La Figura~\ref{fig:materializacion-discriminador} contrasta los dos casos. En una petición inicial sin destino específico, la identidad de la instancia productora aparece dentro del SCP, de modo que un PEP anterior decide sin ella. En una petición asociada a un recurso ya creado, el consumidor transporta esa identidad desde el origen y la misma ubicación dispone del dato.
+
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=0.85\textwidth]{/chapter2/5gc-sba-architecture.png}
-	\caption{Arquitectura lógica del núcleo 5G Standalone (5GC) basada en servicios.}
-	\label{fig:5gc-sba}
-	
-	\vspace{0.3cm}
-	\small Fuente: Tomado de \cite{UPMF_UPFDeployment}
+    \centering
+    \input{figures/chapter2/materializacion_discriminador.tex}
+    \caption{Momento en que se materializa la identidad de la instancia productora, según el estado de la petición.}
+    \label{fig:materializacion-discriminador}
+    \notafuente{Elaboración propia.}
 \end{figure}
 
-\subsection{Network slicing en el núcleo 5G}
-\label{subsec:5gc-slicing}
+\subsection{Políticas, intents y puntos de ejecución}
+\label{subsec:fundamentos-politicas}
+
+La arquitectura de seguridad de 5G contempla autenticación y autorización para las comunicaciones de servicio entre NF~\cite{ETSI_TS_133501_R16}. Una política expresa condiciones y acciones aplicables a esas comunicaciones. El \textit{intent} describe el resultado deseado con independencia del mecanismo que terminará implementándolo. En esta tesis, el objetivo no es bloquear toda comunicación de una NF, sino contener combinaciones específicas de consumidor, productor, operación o estado, mientras se mantienen las interacciones legítimas. Esta propiedad define la contención selectiva.
+
+El PEP es el punto donde la política se vuelve operativa. Allí deben coincidir cuatro condiciones: los discriminadores ya existen, el PEP puede observarlos con la confianza necesaria, el lenguaje permite expresar el predicado y el mecanismo puede ejecutar la acción antes de que la petición llegue al productor. Una política puede estar bien formulada y, aun así, no ser realizable en una ubicación que carece de esos datos o capacidades. Los estudios sobre funciones compartidas muestran, por ejemplo, que la identidad del consumidor, la pertenencia a un \textit{slice} y la autorización deben vincularse correctamente para impedir accesos no previstos~\cite{E0092}.
+
+\subsection{Capas de control, observabilidad y confianza}
+\label{subsec:fundamentos-observabilidad}
+
+Los controles de red operan con distintos niveles de información. En L3/L4 pueden emplear direcciones, puertos, protocolos y, cuando la plataforma lo proporciona, identidades de cargas de trabajo. En L7 pueden considerar métodos, rutas, cabeceras y otros campos propios de la operación SBA. Las mallas de servicios ubican proxies junto a las aplicaciones para aplicar políticas L7, mientras que mecanismos basados en eBPF pueden actuar en la ruta de red con menor dependencia del código de cada NF~\cite{E0005,E0019}.
+
+Mayor detalle no implica mayor confianza. Una cabecera L7 puede ser visible pero haber sido escrita por una NF comprometida. De forma inversa, TLS o mTLS protege el canal, aunque impide que un PEP situado fuera del punto de terminación inspeccione el mensaje. Por esta razón se distingue entre información materializada, información visible e información confiable. La procedencia del dato, la frontera criptográfica y el modelo de amenaza determinan si un atributo puede sustentar una decisión de seguridad.
+
+La plataforma experimental combina estos niveles. Open5GS implementa el núcleo 5G; K3s administra las cargas en contenedores; Cilium proporciona conectividad y control de red; y UERANSIM genera procedimientos de acceso y sesión. Estos componentes permiten variar el trayecto, la ubicación del PEP y el estado de selección sin cambiar el objetivo de política. Las versiones, configuraciones y límites de cada componente se especificarán en el capítulo de diseño.
+
+\section{Método de la revisión sistemática}
+\label{sec:rsl}
+
+\subsection{Diseño de la revisión}
+\label{subsec:justificacion-rsl}
+
+La literatura sobre seguridad en 5G Core reúne propuestas de mallas de servicios, autorización, microsegmentación, análisis formal, proxies de comunicación y monitoreo. Como estos trabajos no siempre estudian la misma unidad de análisis ni sitúan el control en el mismo punto del trayecto, se aplicó una revisión sistemática basada en las directrices de Kitchenham y Charters para ingeniería de software~\cite{KitchenhamCharters2007Guidelines}.
+
+El proceso comprendió planificación, búsqueda, selección, evaluación a texto completo, extracción y síntesis. El protocolo se definió antes de seleccionar los estudios y se conservaron las consultas, exportaciones y decisiones de exclusión necesarias para reproducir la revisión. No se realizó un metaanálisis porque los trabajos emplean arquitecturas, cargas y métricas heterogéneas.
+
+\subsection{Preguntas, fuentes y estrategia de búsqueda}
+\label{subsec:protocolo-rsl}
+
+La revisión respondió las preguntas de la Tabla~\ref{tab:preguntas-rsl}. Las preguntas se complementan: PR1 identifica mecanismos de control; PR2 estudia las condiciones que hacen posible o limitan su aplicación; y PR3 examina cómo se validan las propuestas y qué problemas permanecen abiertos.
+
+\begin{table}[H]
+    \centering
+    \caption{Preguntas de la revisión sistemática}
+    \label{tab:preguntas-rsl}
+    \small
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}>{\bfseries}p{1.2cm}X@{}}
+        \toprule
+        ID & Pregunta de revisión \\
+        \midrule
+        PR1 & ¿Qué enfoques se han propuesto para aplicar o verificar control de acceso y contención selectiva en 5G Core SBA? \\
+        PR2 & ¿Qué condiciones de selección, \textit{binding}, visibilidad, identidad y capacidad del mecanismo habilitan o limitan esos enfoques? \\
+        PR3 & ¿Cómo se validan las propuestas, qué resultados reportan y qué problemas permanecen abiertos? \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia.}
+    \end{singlespace}
+\end{table}
+
+Se consultaron IEEE Xplore, ACM Digital Library, ScienceDirect y Scopus para el periodo 2017--2026. La estrategia se dividió en dos búsquedas. La primera cubrió políticas, autorización y mecanismos de control; la segunda se concentró en SCP, descubrimiento, selección, \textit{binding} y reselección. La Tabla~\ref{tab:cadenas-rsl} presenta las cadenas maestras. Su sintaxis se adaptó a cada base sin cambiar la lógica conceptual.
+
+\begin{table}[H]
+    \centering
+    \caption{Cadenas maestras de búsqueda}
+    \label{tab:cadenas-rsl}
+    \footnotesize
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}>{\bfseries\raggedright\arraybackslash}p{2.8cm}>{\raggedright\arraybackslash}X@{}}
+        \toprule
+        Familia & Cadena maestra \\
+        \midrule
+        Control y seguridad &
+        (``5G core'' OR 5GC OR ``5G service-based architecture'' OR ``cloud-native 5G'' OR ``cloud native 5G'') AND (``security policy'' OR authorization OR enforcement OR ``access control'' OR microsegmentation OR ``zero trust'' OR ``service mesh'') \\
+        \addlinespace
+        Selección e intermediación &
+        (``5G core'' OR 5GC OR ``5G service-based architecture'') AND (``service communication proxy'' OR SCP OR ``delegated discovery'' OR ``NF discovery'' OR ``network function discovery'' OR ``NF selection'' OR ``network function selection'' OR binding OR reselection) \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia.}
+    \end{singlespace}
+\end{table}
+
+Se incluyeron artículos de revista, trabajos de conferencia y capítulos de libro revisados por pares, escritos en inglés o español, que aportaran un modelo, mecanismo, análisis o evaluación técnica relacionado con las preguntas de revisión. Se excluyeron fuentes secundarias, publicaciones fuera del periodo, trabajos ajenos a 5G Core o su SBA y documentos sin texto completo disponible.
+
+La selección tuvo dos niveles. El primero evaluó título y resumen. El segundo revisó el texto completo y registró la razón de exclusión. Cuando un registro aparecía en más de una consulta o base, se conservaba una sola entidad bibliográfica, pero se mantenía la procedencia de todas sus apariciones. Esta separación entre registro y aparición evita inflar el número de estudios y conserva la trazabilidad de la búsqueda.
+
+\subsection{Selección de estudios}
+\label{subsec:resultados-rsl}
+
+Las búsquedas produjeron 809 registros. Después de consolidar 211 apariciones duplicadas, se evaluaron 598 estudios únicos por título y resumen. De ellos, 510 se excluyeron y 88 pasaron a la revisión de texto completo. Se recuperaron 86 documentos; dos no estuvieron disponibles. La evaluación final excluyó 14 trabajos que no respondían las preguntas de investigación y dejó 72 estudios para la síntesis.
+
+
+La Tabla~\ref{tab:resultados-rsl} resume el flujo de selección. Los 72 estudios incluidos se organizaron por pregunta de investigación y familia temática. Un mismo trabajo podía contribuir a más de una pregunta, por lo que las categorías no se trataron como grupos excluyentes.
+
+\begin{table}[H]
+    \centering
+    \caption{Flujo de selección de la revisión sistemática}
+    \label{tab:resultados-rsl}
+    \small
+    \begin{singlespace}
+    \begin{tabularx}{0.86\textwidth}{@{}X>{\raggedleft\arraybackslash}p{2.2cm}@{}}
+        \toprule
+        Etapa & Registros \\
+        \midrule
+        Identificados en las bases de datos & 809 \\
+        \quad\textit{apariciones duplicadas consolidadas} & \textit{--211} \\
+        Estudios únicos evaluados por título y resumen & 598 \\
+        \quad\textit{excluidos en el cribado} & \textit{--510} \\
+        Buscados a texto completo & 88 \\
+        \quad\textit{no recuperados} & \textit{--2} \\
+        Textos completos evaluados & 86 \\
+        \quad\textit{excluidos por falta de pertinencia} & \textit{--14} \\
+        \midrule
+        Incluidos en la síntesis & 72 \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia.}
+    \end{singlespace}
+\end{table}
 
-Como se presentó en el Capítulo~1 (ver en particular la Tabla~\ref{tab:slices-caracteristicas}), el \textit{network slicing} se utiliza para satisfacer requisitos de servicio diferenciados sobre una infraestructura física compartida~\cite{3GPP2018,Popovski2018,Foukas2017}. En lo que sigue se deja de lado la caracterización general de categorías como eMBB, URLLC y mMTC, ya introducidas en dicho capítulo, y se pone el foco exclusivamente en cómo el \textit{network slicing} se materializa en el núcleo 5G y dentro del alcance de esta tesis.
+\subsection{Registro y alcance de la revisión}
+\label{subsec:producto-rsl}
 
-En el plano del núcleo, la diferenciación entre \textit{slices} se expresa a través del S-NSSAI, que asocia cada sesión de usuario a un conjunto de parámetros de servicio, incluyendo el tipo de slice (SST) y, opcionalmente, un identificador de diferenciación. A partir de esta asociación, funciones como AMF, SMF y PCF aplican políticas y decisiones de encaminamiento coherentes con el perfil del \textit{slice}. De forma simplificada, pueden distinguirse tres dimensiones principales de materialización del \textit{network slicing} en el 5GC~\cite{Foukas2017}:
-\begin{itemize}
-	\item \textbf{Políticas de QoS diferenciadas:} SMF y PCF asignan distintos perfiles de QoS y reglas de tratamiento de tráfico según el S-NSSAI de la sesión, configurando, por ejemplo, prioridades relativas, límites de tasa o parámetros de \textit{scheduling}.
-	\item \textbf{Aislamiento lógico de funciones de red:} Distintos \textit{slices} pueden compartir o no instancias de funciones como AMF, SMF o UPF. Un \textit{slice} crítico en términos de latencia puede contar con instancias dedicadas de ciertas funciones, mientras que otros pueden compartirlas, aceptando un mayor grado de contención de recursos.
-	\item \textbf{Gestión independiente del ciclo de vida:} La creación, modificación y eliminación de \textit{slices} pueden gestionarse de forma separada, permitiendo ajustar dinámicamente los recursos asignados o introducir nuevas configuraciones sin afectar a otros \textit{slices}.
-\end{itemize}
+Para cada estudio se conservaron los metadatos, la procedencia, la decisión de selección, la categoría temática y los fragmentos utilizados en la síntesis. El registro vincula las afirmaciones con sus fuentes y distingue el aporte de cada artículo de las conclusiones obtenidas al comparar el corpus. Las diferencias entre pilas, topologías, cargas y métricas impidieron agregar estadísticamente los resultados de rendimiento~\cite{E0004,E0019,E0196,E0200}.
 
-En despliegues de operador, el \textit{network slicing} se extiende a la RAN y a la red de transporte. Sin embargo, en esta tesis se adopta una visión deliberadamente acotada: todos los \textit{slices} comparten la misma RAN simulada, y la diferenciación se implementa exclusivamente en el núcleo 5G y en los recursos de cómputo y red de la infraestructura \textit{cloud-native}. A partir de este acotamiento, en el contexto de esta tesis el \textit{network slicing} se interpreta como:
-\begin{enumerate}
-	\item La definición de perfiles de servicio diferenciados a nivel del 5GC, y
-	\item La asignación de recursos computacionales y de red diferenciados a las funciones asociadas a cada \textit{slice}.
-\end{enumerate}
+\section{Hallazgos del estado del arte}
+\label{sec:estado-arte}
 
-Esta interpretación actúa como marco conceptual para las decisiones de diseño de la plataforma y para la formulación de los escenarios experimentales que se presentarán en capítulos posteriores.
+\subsection{Familias de mecanismos de control}
+\label{subsec:enfoques-control}
 
-\subsection{Kubernetes como plataforma cloud-native para funciones de red}
-\label{subsec:k8s-funciones-red}
+Los estudios incluidos proponen controles en distintos puntos del trayecto. Las mallas de servicios introducen proxies \textit{sidecar} capaces de interceptar llamadas HTTP/2 y aplicar lógica L7 sin modificar cada función de red. Aldas y Babakian estudian esta integración para 5G y analizan el uso de Envoy en escenarios de descubrimiento y enrutamiento~\cite{E0005}. 5G-STREAM adapta el enfoque para reducir operaciones redundantes y reforzar autorización y confiabilidad en la comunicación entre microservicios~\cite{E0004}.
 
-Kubernetes es un sistema de orquestación de contenedores que se ha consolidado como plataforma de facto para el despliegue de aplicaciones \textit{cloud-native}. Su modelo de abstracción se basa en agrupar contenedores relacionados en \textit{pods}, que se ejecutan sobre nodos de un clúster y son gestionados a través de primitivas de alto nivel como \textit{Deployments}, \textit{ReplicaSets} y \textit{Services}. Estas primitivas permiten gestionar el ciclo de vida de las aplicaciones, su escalamiento, la recuperación ante fallos y la exposición de servicios dentro y fuera del clúster.
+La microsegmentación multinivel combina controles que observan información diferente. THAALOUB integra Cilium y eBPF para reglas L3/L4 con Istio para control L7, y añade una capa que traduce \textit{intents} a políticas técnicas~\cite{E0019}. ZTX-SEM adopta otro punto del diseño: incorpora un componente de seguridad junto a las funciones de red para interceptar tráfico y establecer protección entre extremos sin depender de la semántica de un protocolo de aplicación particular~\cite{E0045}.
 
-En el ámbito de las redes 5G, la transición desde funciones de red virtualizadas (VNFs) hacia funciones de red \textit{cloud-native} (CNFs) ha sido objeto de amplio interés~\cite{VNFtoCNF,CloudNativeB5GCore}. Las CNFs se diseñan específicamente para ejecutarse en contenedores y aprovechar capacidades como el despliegue declarativo, el escalamiento y la observabilidad. Trabajos como CoreKube~\cite{CoreKube} y Cloud-Native Plinth~\cite{CloudNativePlinth} exploran arquitecturas de núcleo 5G basadas en microservicios desplegados sobre Kubernetes, evidenciando el potencial de esta plataforma para soportar funciones de control y de usuario del 5GC.
+Otros trabajos sitúan la decisión en el SCP. ACGuard5GC integra monitores de referencia que examinan la señalización HTTP/2 y descartan mensajes que incumplen propiedades de seguridad antes de que alcancen la función productora~\cite{E0061}. Esta ubicación ofrece contexto semántico del plano de control, aunque el trabajo también considera cooperación entre varios SCP, aspecto que excede el alcance de un único PEP adoptado en esta tesis.
 
-Desde la perspectiva de un núcleo 5G, mapear las funciones de red a primitivas de Kubernetes permite, por ejemplo:
-\begin{itemize}
-	\item Desplegar instancias de AMF, SMF o UPF como \textit{pods} gestionados por \textit{Deployments}, con un número de réplicas configurable;
-	\item Exponer interfaces de señalización y datos mediante \textit{Services} de tipo apropiado (ClusterIP, NodePort, LoadBalancer);
-	\item Utilizar \textit{ConfigMaps} y \textit{Secrets} para gestionar parámetros de configuración sensibles.
-\end{itemize}
+La autorización descentralizada constituye una familia diferente. 5G-WAVE despliega proxies locales y representa la delegación de permisos mediante atestaciones criptográficas verificables~\cite{E0069}. La propuesta de Bharath Kumar y Rajavelsamy sustituye la dependencia exclusiva de tokens centralizados por control criptográfico local basado en atributos~\cite{E0012}. Ambos enfoques reducen la dependencia de una decisión central, pero distribuyen el mecanismo de aplicación y, por ello, no corresponden directamente al supuesto de un solo PEP.
 
-Esta aproximación facilita no solo el escalamiento y la resiliencia de las funciones de red, sino también su uso en entornos de laboratorio, donde el despliegue declarativo y la posibilidad de recrear escenarios de forma reproducible son especialmente valiosos. Adicionalmente, el ecosistema de Kubernetes incorpora herramientas de observabilidad (métricas, \textit{logging}, \textit{tracing}) que resultan útiles para visualizar el comportamiento de los \textit{slices} y sus recursos asociados, reforzando el carácter pedagógico de la plataforma.
+Dos propuestas abordan la confianza cero y el control dinámico. 5GC-SDP emplea un perímetro definido por software y autorización de paquete único para ocultar o habilitar servicios~\cite{E0041}. Maitra et al. combinan monitoreo continuo de postura con decisiones de autorización y revocación~\cite{E0050}. Su granularidad y su instante de decisión no siempre coinciden con un predicado selectivo evaluado sobre cada petición SBA.
 
-% Sugerencia de figura:
-% \begin{figure}[H]
-	%   \centering
-	%   \includegraphics[width=0.9\textwidth]{chapter2/5gc-k8s-mapping.pdf}
-	%   \caption{Mapeo conceptual entre funciones del núcleo 5G y primitivas de Kubernetes.}
-	%   \label{fig:5gc-k8s-mapping}
-	% \end{figure}
+El análisis estático y la verificación formal permiten estudiar propiedades que un monitor de ejecución podría pasar por alto. 5GAC-Analyzer examina implementaciones de código abierto y detecta sobreprivilegio asociado con permisos de servicio demasiado amplios~\cite{E0030}. 5GCVerif y CoreScan modelan la autorización de la SBA y encuentran fallas lógicas relacionadas con privilegios y con la vinculación de credenciales en distintos flujos~\cite{E0066,E0036}. Estos métodos sirven para razonar sobre la corrección del diseño, pero no reemplazan la observación del estado real de una petición ni la validación de un PEP en ejecución.
 
-\subsection{Mecanismos nativos de diferenciación de recursos en Kubernetes}
-\label{subsec:k8s-diferenciacion}
+\begin{table}[H]
+    \centering
+    \caption{Comparación de familias de mecanismos de control}
+    \label{tab:familias-control}
+    \scriptsize
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}
+        >{\raggedright\arraybackslash}p{2.8cm}
+        >{\raggedright\arraybackslash}p{2.25cm}
+        >{\raggedright\arraybackslash}p{1.55cm}
+        >{\raggedright\arraybackslash}X
+        >{\raggedright\arraybackslash}X@{}}
+        \toprule
+        Familia & Ubicación principal & Capa & Información predominante & Acción o producto \\
+        \midrule
+        Malla de servicios~\cite{E0005,E0004} & Proxy \textit{sidecar} o distribuido & L7 & Cabeceras y ruta de servicio & Permitir, denegar o enrutar llamadas \\
+        Microsegmentación multinivel~\cite{E0019,E0045} & Junto a la NF y red del contenedor & L3/L4 y L7 & Identidad de carga, flujo y mensaje & Filtrado coordinado y protección del canal \\
+        Monitor en SCP~\cite{E0061} & Trayecto indirecto de señalización & L7 & Mensaje y contexto disponible en el proxy & Descarte preventivo de peticiones \\
+        Autorización descentralizada~\cite{E0069,E0012} & Proxies locales o extremos & L7 / criptográfica & Atestaciones, atributos y delegaciones & Verificación local o imposibilidad de descifrado \\
+        SDP y control de postura~\cite{E0041,E0050} & Perímetro, NRF o productores & L3/L4 y control & Identidad, postura y estado de autorización & Apertura de acceso, denegación o revocación \\
+        Análisis estático y formal~\cite{E0030,E0066,E0036} & Fuera del trayecto de ejecución & Modelo / código & Especificación, \textit{scopes} y flujos & Detección de fallas y verificación de propiedades \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia a partir de los estudios citados.}
+    \end{singlespace}
+\end{table}
 
-Además de gestionar el ciclo de vida de aplicaciones, Kubernetes proporciona mecanismos nativos para la diferenciación y el aislamiento de recursos entre cargas de trabajo. Estos mecanismos son especialmente relevantes para emular el comportamiento de \textit{slices} con requisitos divergentes de QoS sobre un clúster compartido.
+Los mecanismos cubren necesidades distintas. Un control L3/L4 puede actuar temprano y con bajo acoplamiento a la aplicación, pero sólo distingue los atributos presentes en el flujo. Un proxy L7 observa la semántica de la petición, aunque la utilidad de una cabecera depende de quién la genera y de si ese actor pertenece al modelo de amenaza. Acercar el PEP al productor puede revelar el destino efectivo y, al mismo tiempo, ocultar la identidad original del consumidor detrás de un intermediario.
 
-Uno de los mecanismos más fundamentales es la especificación de \textit{requests} y \textit{limits} de recursos, particularmente CPU y memoria, en las definiciones de \textit{pods}. Los \textit{requests} indican la cantidad de recursos que el scheduler de Kubernetes debe garantizar como mínimo para un \textit{pod}, mientras que los \textit{limits} establecen un máximo que el contenedor no puede exceder de forma sostenida. Combinados, estos parámetros permiten controlar la densidad de empaquetamiento de \textit{pods} en los nodos y la capacidad de cada \textit{slice} de consumir recursos de cómputo bajo carga.
+\subsection{Condiciones que limitan la decisión}
+\label{subsec:seleccion-visibilidad}
 
-Asociado a lo anterior, Kubernetes define clases de QoS internas (Guaranteed, Burstable y BestEffort) en función de cómo se configuraron los \textit{requests} y \textit{limits} de CPU y memoria. Aunque estas clases no constituyen un mecanismo de QoS de red en sí mismas, influyen en la forma en que el sistema prioriza \textit{pods} durante episodios de presión de recursos, lo que las convierte en una herramienta útil para emular diferencias de prioridad entre \textit{slices}.
+Los resultados convergen en tres límites. El discriminador requerido puede no existir cuando el PEP decide, como ocurre con la identidad de una instancia antes de la selección. En otros casos, el atributo existe pero no es visible o confiable en la ubicación elegida. También puede ocurrir que el PEP lo observe y carezca de un lenguaje o una acción capaces de aplicar el predicado selectivo. Las tres situaciones impiden decidir como exige la política, aunque obedecen a causas distintas.
 
-En el plano de red, el modelo de Kubernetes se apoya en la especificación CNI (\textit{Container Network Interface}), que define un estándar para la provisión de conectividad de red a los \textit{pods}. Sobre esta base, existen múltiples \textit{plugins} CNI que ofrecen funcionalidades adicionales, tales como:
-\begin{itemize}
-	\item \textbf{Calico:} Proporciona redes de capa 3 con políticas de seguridad basadas en \textit{NetworkPolicies}, permitiendo definir reglas de acceso entre grupos de \textit{pods}.
-	\item \textbf{Cilium:} Se basa en eBPF para implementar filtrado de paquetes, balanceo de carga y políticas de seguridad a nivel de capa 3/4/7 con baja sobrecarga, y soporta funcionalidades avanzadas para inspección y control de tráfico~\cite{TimeSensitiveEBPF}.
-\end{itemize}
+El SCP modifica esas condiciones porque puede terminar una conexión y originar otra, seleccionar el destino o procesar información de enrutamiento. ACGuard5GC aprovecha el contexto presente en el proxy para aplicar propiedades sobre los mensajes, pero su diseño también muestra que la información puede quedar repartida entre varios SCP~\cite{E0061}. Los estudios formales advierten que una vinculación incorrecta entre credenciales, consumidor y productor puede habilitar escalamiento o suplantación aun cuando el flujo utilice mecanismos de autorización~\cite{E0066,E0036}.
 
-Las \textit{NetworkPolicies} de Kubernetes permiten definir, de forma declarativa, qué flujos de tráfico están permitidos entre \textit{pods}, \textit{namespaces} y/o direcciones externas. Aunque su objetivo principal es la seguridad, también son un mecanismo de aislamiento lógico entre grupos de servicios asociados a distintos \textit{slices}. Por otro lado, trabajos como NBWGuard~\cite{NBWGuard} muestran que es posible complementar estos mecanismos con control de ancho de banda y prioridades de tráfico en el plano de red, integrándose con el ecosistema de Kubernetes para ofrecer QoS diferenciada.
+La protección criptográfica introduce otro límite de observación. TLS y mTLS protegen confidencialidad e integridad del canal, pero un PEP externo a la terminación no puede inspeccionar el contenido L7 cifrado. La evaluación de E0196 muestra que el costo de TLS depende del perfil experimental, incluida la biblioteca empleada y la topología de despliegue~\cite{E0196}; sus resultados de rendimiento no constituyen una prueba general sobre observabilidad. Por ello, la tesis no considera que ``L7 visible'' y ``L7 confiable'' sean expresiones equivalentes.
 
-En el contexto de la presente tesis, estos mecanismos nativos y extensiones CNI se utilizan como base para implementar \textit{slices} con diferentes perfiles de recursos de cómputo y, potencialmente, con reglas de tratamiento de tráfico diferenciadas, sin recurrir a marcos de orquestación de grado operador considerablemente más complejos.
+\subsection{Métodos de evaluación y vacío identificado}
+\label{subsec:validacion-corpus}
 
-\subsection{Integración conceptual de Open5GS y Kubernetes en un entorno educativo}
-\label{subsec:open5gs-k8s-educativo}
+Los estudios evalúan sus propuestas con métodos diferentes. Los prototipos y bancos de prueba observan tráfico real y costos de ejecución mediante combinaciones de Open5GS u OpenAirInterface, plataformas Kubernetes y emuladores como UERANSIM o gNBSIM~\cite{E0004,E0019,E0069,E0196}. El análisis formal explora secuencias y propiedades de autorización, pero abstrae partes del \textit{runtime}~\cite{E0066,E0036}. Otros trabajos inspeccionan código y configuraciones~\cite{E0030,E0566}, o reconstruyen comportamientos anómalos a partir de datos de ejecución~\cite{E0100,E0200}.
 
-Open5GS es una implementación \textit{open-source} del núcleo 5G SA que proporciona las principales funciones de control y usuario en software, incluyendo AMF, SMF, UPF y otros componentes opcionales~\cite{PerfOSS5GSA}. Su carácter abierto y su relativa sencillez de despliegue lo han convertido en una herramienta atractiva para experimentación académica y prototipado de redes 5G. Por otro lado, Kubernetes ofrece una plataforma madura para la gestión de servicios en contenedores, ampliamente adoptada en la industria y con abundante documentación y herramientas de apoyo.
+Una variación de latencia medida en una máquina virtual no es comparable, sin controles adicionales, con otra obtenida en una topología multinodo o bajo una carga diferente. Tampoco una propiedad demostrada en un modelo formal prueba que una implementación concreta la preserve. Cada resultado se interpreta dentro de las condiciones reportadas; la comparación causal se reserva para los perfiles controlados de esta tesis.
 
-La integración conceptual de Open5GS con Kubernetes, en el contexto de un laboratorio educativo, persigue varios objetivos:
-\begin{itemize}
-	\item \textbf{Reproducibilidad y automatización:} describir el despliegue de las funciones de Open5GS mediante manifiestos declarativos de Kubernetes (archivos YAML) permite recrear la infraestructura de forma sistemática, facilitando la repetición de experimentos y la distribución de escenarios a estudiantes.
-	\item \textbf{Aislamiento y diferenciación de \textit{slices}:} mapear \textit{slices} lógicos a configuraciones específicas de recursos (\textit{requests}/\textit{limits}) y, eventualmente, a políticas de red (NetworkPolicies, reglas de Cilium) hace posible observar en la práctica diferencias de rendimiento entre \textit{slices} que comparten el mismo clúster físico.
-	\item \textbf{Transparencia de mecanismos:} a diferencia de plataformas de orquestación de grado operador, donde el \textit{network slicing} se gestiona a través de múltiples capas de abstracción, la combinación Open5GS--Kubernetes permite exponer al estudiante las primitivas concretas (pods, servicios, límites de recursos, reglas de red) que materializan la diferenciación entre \textit{slices}.
-\end{itemize}
+Ninguno de los 72 estudios reunió simultáneamente el estado de selección y \textit{binding} de cada petición, la ubicación y capa del PEP, la observación confiable de los discriminadores, la capacidad de expresar y ejecutar el predicado, y la contención preventiva mediante un único PEP al recibir la petición. El hallazgo se limita al corpus y al protocolo descritos; no establece novedad absoluta ni comprende trabajos no indexados, posteriores o fuera del periodo de búsqueda.
 
-En un escenario típico, la RAN y los equipos de usuario se emulan mediante herramientas como UERANSIM o srsRAN, que generan tráfico hacia el núcleo Open5GS desplegado en Kubernetes. Los \textit{slices} se representan como combinaciones de:
-\begin{itemize}
-	\item Parámetros de configuración en Open5GS (por ejemplo, perfiles de QoS asociados a distintos S-NSSAI); y
-	\item Configuraciones de recursos y red en Kubernetes (por ejemplo, \textit{namespaces} o etiquetas que agrupan \textit{pods} y definen sus límites de CPU/memoria y sus políticas de tráfico).
-\end{itemize}
-
-La elección concreta de la herramienta de emulación (UERANSIM o srsRAN) se justifica en el capítulo de diseño de la plataforma, considerando criterios de integración con Open5GS, complejidad operativa y adecuación a un entorno de laboratorio universitario.
-
-Desde el punto de vista educativo, esta integración ofrece un entorno en el que los estudiantes pueden:
-\begin{itemize}
-	\item Observar el impacto de distintas configuraciones de recursos sobre la latencia y \textit{throughput} de flujos asociados a distintos \textit{slices};
-	\item Inspeccionar los manifiestos de Kubernetes y las configuraciones de Open5GS que implementan estos comportamientos; y
-	\item Experimentar con modificaciones controladas (por ejemplo, cambiar límites de CPU o reglas de red) para explorar el espacio de diseño de \textit{network slicing} en el núcleo 5G.
-\end{itemize}
-
-Esta visión conceptual sirve como base para las decisiones de diseño que se detallarán en capítulos posteriores, donde se concretan la arquitectura lógica y física de la plataforma, así como los escenarios experimentales que se utilizarán para validar su capacidad de diferenciación entre \textit{slices}.
-
-% Sugerencia de figura:
-% \begin{figure}[H]
-	%   \centering
-	%   \includegraphics[width=0.9\textwidth]{chapter2/open5gs-k8s-educational-platform.pdf}
-	%   \caption{Visión conceptual de la integración Open5GS--Kubernetes en un entorno educativo de \textit{network slicing} 5G.}
-	%   \label{fig:open5gs-k8s-educativo}
-	% \end{figure}
-
-
-
-
-
-
-\section{Metodología de la revisión sistemática de literatura}
-\label{sec:metodologia-rsdl}
-
-La revisión de literatura realizada en esta tesis se estructuró como una revisión sistemática de literatura, siguiendo las directrices generales propuestas por Kitchenham para disciplinas de ingeniería~\cite{Kitchenham2004} y adaptándolas al contexto de redes 5G y tecnologías \textit{cloud-native}. El objetivo fue contar con un procedimiento explícito y reproducible para identificar estudios relevantes sobre: (i) arquitecturas \textit{cloud-native} de núcleo 5G, (ii) mecanismos de aislamiento, QoS y \textit{network slicing} en plataformas \textit{cloud-native}, (iii) herramientas complementarias integradas a Kubernetes, y (iv) \textit{testbeds} o plataformas 5G de carácter educativo.
-
-\subsection{Preguntas de investigación y su rol}
-\label{subsec:preguntas-rsdl}
-
-La revisión se organizó en torno a cuatro preguntas de investigación:
-
-\begin{description}
-	\item[\textbf{PI1.}] ¿Cómo define y materializa la literatura una arquitectura de núcleo 5G \textit{cloud-native} y qué patrones de diseño propone?
-	\item[\textbf{PI2.}] ¿Qué mecanismos de aislamiento, diferenciación de recursos y QoS se han utilizado para soportar \textit{network slicing} o comportamientos equivalentes en plataformas \textit{cloud-native} (en particular Kubernetes) aplicadas a 5G Core u otros servicios de red de alto rendimiento?
-	\item[\textbf{PI3.}] ¿Qué herramientas o servicios complementarios (Cilium, eBPF, \textit{service meshes}, \textit{frameworks} de \textit{traffic shaping}, etc.) se han integrado con Kubernetes u otras plataformas \textit{cloud-native} para mejorar el aislamiento o la QoS de servicios de red, y con qué resultados?
-	\item[\textbf{PI4.}] ¿Qué plataformas o \textit{testbeds} existen que permitan experimentar con 5G (idealmente 5G SA y núcleo 5G) con un propósito educativo o de investigación, y cómo se posicionan frente a una plataforma basada en componentes \textit{open-source} (Open5GS + Kubernetes)?
-\end{description}
-
-Cada una de estas preguntas cumple un rol específico dentro de la tesis: PI1 busca identificar patrones arquitectónicos de 5GC \textit{cloud-native} transferibles al diseño de la plataforma; PI2 se orienta a reconocer mecanismos de diferenciación de recursos y QoS aplicables a la implementación de \textit{slices}; PI3 se centra en herramientas complementarias que puedan integrarse de forma realista en el entorno \textit{cloud-native} considerado; y PI4 permite posicionar la plataforma propuesta frente a otros \textit{testbeds} educativos o experimentales.
-
-\subsection{Estrategia de búsqueda y criterios de selección}
-\label{subsec:estrategia-busqueda}
-
-Se utilizaron cuatro bases de datos digitales de amplio uso en telecomunicaciones y sistemas distribuidos: IEEE Xplore, ACM Digital Library, ScienceDirect y Scopus. Se consideraron publicaciones en inglés, desde 2018 hasta 2025, incluyendo artículos de revista, ponencias, \textit{workshops} y demostraciones técnicas con descripción arquitectónica.
-
-Los términos de búsqueda se agruparon en cuatro ejes alineados con PI1--PI4: (i) 5G Core y \textit{cloud-native}, (ii) Kubernetes y mecanismos de aislamiento/QoS, (iii) herramientas complementarias (\textit{service mesh}, eBPF, Cilium, etc.) y (iv) \textit{testbeds} 5G. Algunos ejemplos representativos de cadenas de búsqueda son:
-\begin{itemize}
-	\item \textquotedbl cloud native\textquotedbl{} AND \textquotedbl 5G\textquotedbl{} AND \textquotedbl core\textquotedbl{}
-	\item \textquotedbl 5G core\textquotedbl{} AND \textquotedbl cloud native\textquotedbl{} AND \textquotedbl kubernetes\textquotedbl{}
-	\item \textquotedbl kubernetes\textquotedbl{} AND \textquotedbl resource isolation\textquotedbl{} AND \textquotedbl network slicing\textquotedbl{}
-	\item \textquotedbl kubernetes\textquotedbl{} AND \textquotedbl QoS\textquotedbl{} AND \textquotedbl ebpf\textquotedbl{}
-	\item \textquotedbl 5G\textquotedbl{} AND \textquotedbl testbed\textquotedbl{} AND \textquotedbl open source\textquotedbl{}
-\end{itemize}
-
-
-Para asegurar la coherencia con las preguntas de investigación y con el enfoque formativo de la tesis, se definieron criterios explícitos de inclusión y exclusión. Se incluyeron estudios que abordaran arquitecturas de núcleo 5G \textit{cloud-native}, mecanismos de aislamiento o de QoS en plataformas \textit{cloud-native} (particularmente Kubernetes), integración de herramientas complementarias pertinentes (Cilium, eBPF, \textit{service meshes}, NBWGuard, entre otras) y \textit{testbeds} 5G basados en componentes \textit{open-source} con fines educativos o experimentales.
-
-
-Por el contrario, se excluyeron trabajos centrados exclusivamente en la RAN, marcos MANO de nivel operador, propuestas predominantemente algorítmicas sin una arquitectura reproducible, estudios orientados a verticales donde el núcleo se aborda como una caja negra y análisis de seguridad sin impacto directo en el diseño del núcleo, en el uso de Kubernetes o en la construcción del \textit{testbed}.
-
-\subsection{Proceso de filtrado y matriz de extracción}
-\label{subsec:proceso-filtrado}
-
-El proceso de selección se desarrolló en tres pasos. En primer lugar, se realizó un filtrado por título sobre los registros iniciales, descartando aquellos claramente irrelevantes. Esta etapa redujo el conjunto a 476 estudios candidatos. En segundo lugar, se analizó el resumen (\textit{abstract}) de estos 476 estudios, evaluando su contribución potencial a PI1--PI4 y el cumplimiento de los criterios de inclusión; como resultado, se obtuvieron 76 estudios primarios.
-
-Finalmente, se seleccionó un subconjunto de 20 estudios núcleo para lectura detallada y análisis exhaustivo, atendiendo a su relevancia central para las preguntas de investigación, su potencial de replicabilidad en el contexto de la plataforma propuesta y su representatividad de los patrones arquitectónicos y mecanismos identificados.
-
-Sobre estos 20 estudios se construyó una matriz de extracción de datos que recoge, para cada uno, información bibliográfica básica, objetivo y contribución principal, componentes de núcleo 5G considerados, grado de adopción de principios \textit{cloud-native}, presencia de \textit{network slicing} o mecanismos de aislamiento/QoS, uso de herramientas complementarias, carácter \textit{open-source}, resultados experimentales y limitaciones, así como su aporte a PI1--PI4 y su relevancia global para la tesis.
-
-En la Sección~\ref{sec:resultados-estado-arte} se presentará una tabla resumen derivada de esta matriz y se discutirán los resultados agrupando los estudios según su contribución dominante (arquitecturas \textit{cloud-native} de 5GC, mecanismos de aislamiento y \textit{network slicing} en entornos \textit{cloud-native}, herramientas complementarias y \textit{testbeds} educativos 5G).
-
-
-
-
-\section{Resultados de la revisión sistemática y estado del arte}
-\label{sec:resultados-estado-arte}
-
-Esta sección sintetiza los resultados de la revisión sistemática descrita en la Sección~\ref{sec:metodologia-rsdl}, con foco en los 20 estudios analizados en profundidad. Primero se ofrece una visión general de la muestra y una tabla resumen con atributos clave; luego se presenta un análisis temático organizado en torno a cuatro ejes: (i) arquitecturas \textit{cloud-native} de núcleo 5G, (ii) mecanismos de diferenciación y aislamiento en entornos \textit{cloud-native}, (iii) herramientas complementarias integradas a Kubernetes y (iv) plataformas o bancos de pruebas 5G con fines educativos.
-
-\subsection{Visión general de los estudios analizados}
-\label{subsec:vision-general-estudios}
-
-El conjunto de estudios analizados en profundidad cubre un espectro que va desde propuestas arquitectónicas de 5GC \textit{cloud-native} y migración de VNFs a CNFs~\cite{CoreKube,CloudNativePlinth,VNFtoCNF,CloudNativeB5GCore} (E01--E04), hasta marcos de gestión de \textit{network slicing} y QoS sobre infraestructuras \textit{cloud-native}~\cite{DynQASliceMgmt,QoSEnabledSliceModel5G} (E08,E09), pasando por trabajos centrados en herramientas complementarias (por ejemplo, eBPF, \textit{service meshes})~\cite{TimeSensitiveEBPF,ServiceMesh5GCoreEval,CNSFC5G,NBWGuard} (E12,E14--E16) y por plataformas experimentales 5G de carácter \textit{open-source} o educativo~\cite{PerfOSS5GSA,LoFi5GMAT,CompOSS_E2E5GSA,PerfOpen5GS_K8s} (E17--E20).
-
-La Tabla~\ref{tab:resumen-matriz-extraccion} resume, de forma compacta, algunos atributos estructurales de los estudios núcleo: tipo de contribución, relación con 5GC SA, adopción de Kubernetes, presencia de \textit{network slicing} y uso de herramientas complementarias. Esta tabla se deriva de la matriz de extracción construida a partir de los 20 estudios.
-
-{\footnotesize
-	\renewcommand{\arraystretch}{0.85}
-	\begin{spacing}{1.35}
-
-	\begin{longtable}{|p{2.1cm}|p{0.9cm}|p{2.2cm}|p{4.2cm}|p{4.2cm}|}
-		\caption{Resumen de los estudios núcleo analizados}
-		\label{tab:resumen-matriz-extraccion} \\ \hline
-%		\rowcolor{lightgray}
-		\textbf{Código y cita} & \textbf{Año} & \textbf{Contribución} & \textbf{Tecnologías / características} & \textbf{Aporte a la tesis} \\ \hline
-		\endfirsthead
-		
-		\hline
-		\textbf{Código y cita} & \textbf{Año} & \textbf{Contribución} & \textbf{Tecnologías / características} & \textbf{Aporte a la tesis} \\ \hline
-		\endhead
-		
-		E01 CoreKube \cite{CoreKube} & 2023 & 5GC cloud-native &
-		SBA, microservicios, Kubernetes. &
-		Patrones cloud-native para descomposición del núcleo (PI1). \\ \hline
-		
-		E02 CNPlinth \cite{CloudNativePlinth} & 2024 & 5GC cloud-native &
-		Plataforma contenedorizada, despliegue automatizado. &
-		Base para una capa mínima operativa de 5GC en K8s (PI1). \\ \hline
-		
-		E03 CNB5GCore \cite{CloudNativeB5GCore} & 2023 & 5GC cloud-native &
-		CNFs, separación CP/UP, despliegue distribuido. &
-		Refuerzo de separación AMF/SMF/UPF (PI1). \\ \hline
-		
-		E04 VNFtoCNF \cite{VNFtoCNF} & 2025 & Migración VNF→CNF &
-		Impacto en manejo de estado, operaciones y escalabilidad. &
-		Guía para empaquetado moderado de funciones (PI1). \\ \hline
-		
-		E05 ProcAware Stateless5G \cite{ProcAwareStateless5G} & 2023 & Núcleo \textit{stateless} &
-		Control \textit{procedure-aware} con separación de estado. &
-		Modelo de separación estado/lógica en Open5GS (PI1). \\ \hline
-		
-		E06 MLSLD \cite{MLSLD} & 2024 & Núcleo \textit{stateless} &
-		Diseño a nivel de mensaje, bajo acoplamiento. &
-		Sustento de enfoque \textit{stateless} para escalado (PI1). \\ \hline
-		
-		E07 SharedNF Placement5G \cite{SharedNFPlacement5G} & 2021 & Slicing/QoS &
-		Optimización de funciones compartidas entre \textit{slices}. &
-		Equilibrio aislamiento–eficiencia (PI1–PI2). \\ \hline
-		
-		E08 DynQASlice Mgmt \cite{DynQASliceMgmt} & 2020 & Gestión dinámica de \textit{slices} &
-		Adaptación de QoS a carga variable en \textit{testbeds}. &
-		Escenarios con tráfico variable (PI2). \\ \hline
-		
-		E09 QoSEnabled SliceModel5G \cite{QoSEnabledSliceModel5G} & 2019 & Slicing/QoS &
-		Clases de QoS, reglas de tratamiento de tráfico. &
-		Definición eMBB/URLLC y selección de métricas (PI1–PI2). \\ \hline
-		
-		E10 CLiSO \cite{CLiSO} & 2023 & Orquestación ligera &
-		Framework simple de orquestación cloud-native. &
-		Evitar MANO compleja; enfoque simple de orquestación (PI2). \\ \hline
-		
-		E11 SurveySlice Isolation5G \cite{SurveySliceIsolation5G} & 2022 & Revisión sobre aislamiento &
-		Mecanismos, métricas y retos de aislamiento. &
-		Base conceptual para aislamiento en K8s+Open5GS (PI2). \\ \hline
-		
-		E12 NBWGuard \cite{NBWGuard} & 2022 & QoS en Kubernetes &
-		Control de tasa y QoS por \textit{pod}/\textit{service}. &
-		Valida uso de \textit{rate limiting} en K8s (PI2–PI3). \\ \hline
-		
-		E13 ClusterSliceK8s \cite{ClusterSliceK8s} & 2023 & Slicing en K8s &
-		Partición lógica de recursos de clúster. &
-		Uso de \textit{namespaces} y cuotas como unidad de \textit{slice} (PI2–PI3). \\ \hline
-		
-		E14 TimeSensitive EBPF \cite{TimeSensitiveEBPF} & 2022 & Red sensible al tiempo &
-		Trayectorias eBPF de baja latencia. &
-		Justifica mencionar CNIs avanzadas (como Cilium) sin complejidad extra (PI3). \\ \hline
-		
-		E15 CNSFC5G \cite{CNSFC5G} & 2021 & SFC cloud-native &
-		Encadenamiento de funciones con Network Service Mesh. &
-		Contraste con el diseño propuesto; motiva evitar \textit{service mesh} en plano de usuario (PI3). \\ \hline
-		
-		E16 ServiceMesh5G CoreEval \cite{ServiceMesh5GCoreEval} & 2022 & Evaluación \textit{service mesh} &
-		Sobrecarga de \textit{service mesh} en 5GC. &
-		Respalda un uso prudente de \textit{service mesh} (PI3). \\ \hline
-		
-		E17 LoFi5GMAT \cite{LoFi5GMAT} & 2025 & \textit{Testbed} educativo &
-		Plataforma 5G virtualizada, bajo costo y alta fidelidad. &
-		Referencia directa para diseño de laboratorio académico (PI4). \\ \hline
-		
-		E18 PerfOpen5GS K8s \cite{PerfOpen5GS_K8s} & 2025 & Evaluación de Open5GS &
-		Rendimiento del plano de control en Kubernetes. &
-		Guía de dimensionamiento de Open5GS en contenedores (PI4). \\ \hline
-		
-		E19 CompOSS E2E5GSA \cite{CompOSS_E2E5GSA} & 2024 & Comparativa 5G SA &
-		Comparación de plataformas E2E 5G SA open-source. &
-		Valida selección de Open5GS + emuladores RAN + K8s (PI4). \\ \hline
-		
-		E20 PerfOSS5GSA \cite{PerfOSS5GSA} & 2024 & Rendimiento 5G SA &
-		Latencia, throughput y uso de recursos. &
-		Base para elección de métricas experimentales (PI4). \\ \hline
-		
-	\end{longtable}
-\end{spacing}
-}
-
-
-
-
-
-A partir de esta base, las subsecciones siguientes presentan un análisis cualitativo agrupando los estudios según su contribución dominante.
-
-\subsection{Arquitecturas cloud-native del núcleo 5G}
-\label{subsec:arquitecturas-5gc-cn}
-
-Un primer grupo de trabajos se centra en la definición y experimentación de arquitecturas de núcleo 5G \textit{cloud-native}. Estos estudios exploran el uso de microservicios, CNFs y despliegues sobre Kubernetes para materializar funciones de control y usuario del 5GC~\cite{CoreKube,CloudNativePlinth,CloudNativeB5GCore,VNFtoCNF,ProcAwareStateless5G} (E01--E05).
-
-En general, se observan tres patrones recurrentes:
-\begin{itemize}
-	\item \textbf{Desacoplo estricto control--usuario:} La separación entre AMF/SMF y UPF se refuerza mediante componentes independientes que pueden escalarse de forma asimétrica, normalmente desplegados como \textit{pods} diferenciados en Kubernetes.
-	\item \textbf{Uso de microservicios y SBA:} Las funciones de control se descomponen en microservicios que se comunican a través de interfaces tipo REST o gRPC, alineándose con la arquitectura SBA definida por 3GPP y facilitando despliegues en contenedores.
-	\item \textbf{Migración progresiva de VNFs a CNFs:} Algunos trabajos abordan explícitamente el proceso de transformación de VNFs monolíticas hacia CNFs nativas de contenedor, discutiendo implicaciones en estado, escalabilidad y gestión del ciclo de vida~\cite{VNFtoCNF,CloudNativeB5GCore} (E03,E04).
-\end{itemize}
-
-Para el contexto educativo de esta tesis, los resultados sugieren que una arquitectura basada en contenedores y \textit{pods} relativamente pocos pero bien definidos (por ejemplo, una instancia de AMF, una o pocas instancias de SMF y varias UPF) ofrece un buen equilibrio entre fidelidad a la visión \textit{cloud-native} y manejabilidad operativa. A diferencia de propuestas con una descomposición muy fina y docenas de microservicios, el enfoque adoptado aquí prioriza la posibilidad de comprender, desplegar y modificar los componentes clave sin generar una sobrecarga cognitiva excesiva.
-
-\subsection{Mecanismos de diferenciación y aislamiento en entornos cloud-native}
-\label{subsec:mecanismos-aislamiento}
-
-Un segundo grupo de estudios se centra en mecanismos de diferenciación de recursos y QoS en plataformas \textit{cloud-native}, con especial atención a Kubernetes. Algunos trabajos proponen marcos explícitos para gestionar \textit{network slicing} a nivel de funciones virtualizadas o contenedorizadas~\cite{DynQASliceMgmt,QoSEnabledSliceModel5G} (E08,E09), mientras que otros se orientan más a mecanismos de QoS genéricos en Kubernetes, como control de ancho de banda o clases de prioridad~\cite{NBWGuard,SurveySliceIsolation5G} (E11,E12).
-Los mecanismos más relevantes para el diseño de esta tesis pueden agruparse en:
-\begin{itemize}
-	\item \textbf{Control de recursos de cómputo:} Uso de \textit{requests} y \textit{limits} de CPU y memoria para influir en el empaquetamiento de \textit{pods}, su clase de QoS interna en Kubernetes y, en consecuencia, su desempeño bajo contención de recursos.
-	\item \textbf{Control de recursos de red:} Mecanismos de modelado de tráfico y control de ancho de banda, a veces implementados mediante extensiones sobre el plano de datos, como NBWGuard~\cite{NBWGuard}, o integrados en CNIs avanzadas.
-	\item \textbf{Aislamiento lógico y topológico:} Uso de \textit{namespaces}, etiquetas y \textit{NetworkPolicies} para agrupar servicios por \textit{slice}, controlar el flujo de tráfico entre ellos y, en algunos casos, asignarles rutas o dominios lógicos diferenciados.
-\end{itemize}
-
-Muchos de estos trabajos persiguen escenarios complejos, con múltiples niveles de orquestación y modelos de optimización sofisticados. En contraste, la plataforma propuesta en esta tesis se apoya en un subconjunto intencionalmente acotado de mecanismos (diferenciación de recursos de CPU/memoria y, potencialmente, reglas básicas de red) suficientes para observar diferencias en latencia, \textit{throughput} y utilización de recursos entre \textit{slices} sin introducir la complejidad de marcos de orquestación de grado operador, y priorizando que dichos efectos sean claramente observables.
-
-\subsection{Herramientas complementarias para control y observabilidad}
-\label{subsec:herramientas-complementarias}
-
-Un tercer grupo de trabajos investiga el uso de herramientas complementarias para mejorar el control, el rendimiento o la observabilidad en despliegues \textit{cloud-native} de funciones de red. Destacan, entre otros:
-\begin{itemize}
-	\item El uso de eBPF para obtener trayectorias de datos de baja latencia, con control fino sobre el tratamiento de paquetes y soporte para aplicaciones sensibles al tiempo~\cite{TimeSensitiveEBPF} (E14);
-	\item La integración de \textit{service meshes} para introducir capacidades de balanceo de carga, encriptación y observabilidad en el plano de servicio de un núcleo 5G~\cite{ServiceMesh5GCoreEval} (E16);
-	\item Propuestas que combinan Kubernetes con aceleración en el plano de datos o con \textit{network functions} optimizadas para escenarios 5G~\cite{CNSFC5G} (E15).
-\end{itemize}
-
-Estos trabajos muestran que es posible mejorar significativamente la visibilidad y el control sobre el tráfico 5G en entornos \textit{cloud-native}, pero también evidencian costos de complejidad no triviales: incorporación de nuevos componentes (proxies, \textit{sidecars}), mayor número de planos de configuración y nuevas curvas de aprendizaje para los operadores.
-
-En el contexto de una plataforma educativa, la revisión sugiere un enfoque prudente: aprovechar principalmente las capacidades estándar de Kubernetes y, como máximo, introducir una herramienta complementaria bien seleccionada (por ejemplo, Cilium como CNI con soporte eBPF) cuando su valor pedagógico sea claro, evitando arquitecturas que requieran dominar un ecosistema demasiado amplio de componentes adicionales. En ese sentido, los trabajos revisados demuestran el potencial de estas herramientas para mejorar el rendimiento y la observabilidad, pero rara vez abordan de forma explícita su adecuación a escenarios docentes de baja complejidad operativa.
-
-\subsection{Plataformas y bancos de pruebas 5G con fines educativos}
-\label{subsec:testbeds-educativos}
-
-Finalmente, varios estudios describen \textit{testbeds} y plataformas experimentales 5G, algunos de carácter general y otros explícitamente orientados a docencia o investigación en pequeña escala~\cite{PerfOSS5GSA,LoFi5GMAT,CompOSS_E2E5GSA,PerfOpen5GS_K8s} (E17--E20). Estos trabajos suelen combinar componentes \textit{open-source} (por ejemplo, Open5GS, srsRAN, UERANSIM) con diferentes infraestructuras de ejecución (máquinas virtuales, contenedores, clusters de laboratorio).
-
-En términos generales, la revisión permite identificar varios patrones:
-\begin{itemize}
-	\item \textbf{Uso de componentes open-source consolidados:} Open5GS aparece recurrentemente como núcleo 5G de referencia, tanto en pruebas de rendimiento como en demostraciones de \textit{network slicing} básico~\cite{PerfOSS5GSA,PerfOpen5GS_K8s} (E18,E20).
-	\item \textbf{Diversidad en la plataforma de ejecución:} Algunos \textit{testbeds} se basan en máquinas virtuales tradicionales, mientras que otros exploran despliegues contenedorizados o combinaciones híbridas, pero no siempre con un enfoque explícito en la pedagogía.
-	\item \textbf{Énfasis en rendimiento más que en usabilidad educativa:} Muchos trabajos se enfocan en demostrar \textit{throughput}, latencia o escalabilidad en escenarios relativamente complejos, sin dedicar atención específica a la simplicidad operativa o a la transparencia de mecanismos para estudiantes.
-\end{itemize}
-
-En conjunto, estos trabajos muestran que los componentes \textit{open-source} como Open5GS, srsRAN y UERANSIM permiten construir \textit{testbeds} 5G funcionales en entornos de laboratorio, pero también ponen de manifiesto que la mayoría de propuestas prioriza el rendimiento o la completitud funcional por encima de la simplicidad operativa y la transparencia de mecanismos. Esta observación deja espacio para plataformas que, manteniendo una fidelidad técnica razonable, estén diseñadas explícitamente para objetivos educativos y prioricen la observabilidad de los mecanismos internos y la simplicidad de despliegue.
-
-
-\section{Criterios de diseño derivados de la literatura}
+\section{Implicaciones para el diseño experimental}
 \label{sec:criterios-diseno}
 
-A partir de los fundamentos teóricos presentados en la Sección~\ref{sec:fundamentos-teoricos} y de los resultados de la revisión sistemática sintetizados en la Sección~\ref{sec:resultados-estado-arte}, se establecen en esta sección los criterios de diseño que orientan la arquitectura y la implementación de la plataforma propuesta. Estos criterios buscan equilibrar tres dimensiones: (i) fidelidad técnica respecto a los principios de 5GC \textit{cloud-native}, (ii) simplicidad operativa compatible con un entorno educativo y (iii) transparencia de mecanismos para facilitar el aprendizaje.
+\subsection{Principios de diseño}
+\label{subsec:criterios-derivados}
 
-\subsection{Principios generales de diseño}
-\label{subsec:principios-generales-diseno}
+La revisión orienta el diseño, pero no determina automáticamente una arquitectura. Se adoptan seis criterios.
 
-Los trabajos revisados sobre arquitecturas \textit{cloud-native} de núcleo 5G muestran que es posible alcanzar altos niveles de flexibilidad y escalabilidad mediante descomposición fina en microservicios y despliegues complejos sobre Kubernetes~\cite{CoreKube,CloudNativePlinth,CloudNativeB5GCore} (E01--E03). Sin embargo, estas propuestas suelen estar orientadas a entornos de investigación avanzada o de grado operador, más que a laboratorios docentes.
+\begin{enumerate}
+    \item \textbf{Tratar la petición como unidad de análisis.} El perfil debe registrar si la instancia productora aún no fue seleccionada, si fue seleccionada para la petición o si existe un \textit{binding} asociado a un recurso. La etiqueta general del modelo de comunicación se conserva como contexto, no como sustituto del estado.
 
-En el contexto de esta tesis, se adoptan los siguientes principios generales:
+    \item \textbf{Declarar la ubicación y la capa del PEP.} Toda predicción debe identificar si el PEP se encuentra antes o después del SCP y si opera con atributos L3/L4, L7 o ambos. No se atribuye al mecanismo información que sólo existe en otro punto del trayecto.
 
-\begin{itemize}
-	\item \textbf{Priorización de mecanismos esenciales frente a completitud exhaustiva.} La plataforma se centra en implementar los mecanismos fundamentales de \textit{network slicing} en el núcleo (perfiles de servicio diferenciados y recursos de cómputo/red diferenciados) que resultan relevantes para la comprensión y experimentación en un entorno docente, sin perseguir la reproducción íntegra de todas las funcionalidades de un despliegue comercial ni de marcos MANO complejos~\cite{Yilma2020,Trakadas2020}.
-	
-	\item \textbf{Simplicidad operativa.} El número de componentes, herramientas y planos de configuración debe mantenerse reducido, evitando arquitecturas con decenas de microservicios o múltiples capas de orquestación. El objetivo es que un estudiante pueda desplegar, entender y modificar la plataforma en el marco de un curso de pregrado.
-	
-	\item \textbf{Transparencia de mecanismos.} Las decisiones de diseño deben favorecer que el estudiante pueda observar directamente cómo las configuraciones de núcleo (Open5GS) y del clúster (Kubernetes) se traducen en comportamiento observable de los \textit{slices} (latencia, \textit{throughput}, utilización de recursos), en lugar de ocultar estos efectos tras abstracciones opacas.
-	
-	\item \textbf{Reproducibilidad en hardware moderado.} Los trabajos sobre \textit{testbeds} 5G educativos y de pequeña escala resaltan la importancia de poder desplegar las plataformas en infraestructuras razonables para una universidad~\cite{PerfOSS5GSA,LoFi5GMAT} (E17,E20). La plataforma propuesta debe ser instalable en uno o pocos servidores estándar, sin requerir granjas de máquinas ni equipamiento especializado.
-	
-\end{itemize}
+    \item \textbf{Separar visibilidad y confianza.} Cada discriminador debe incluir su procedencia. La dirección del peer, una identidad autenticada por el canal y una cabecera escrita por el consumidor no reciben el mismo nivel de confianza.
 
-Estos principios actúan como filtro sobre las alternativas identificadas en la literatura y justifican la selección de un subconjunto de mecanismos y herramientas.
+    \item \textbf{Evaluar capacidad de decisión y de acción.} Observar un atributo no basta. El lenguaje de políticas debe representar el predicado y el PEP debe poder ejecutar la acción preventiva antes de que la petición llegue al productor.
 
-\subsection{Criterios para la arquitectura del núcleo y la plataforma cloud-native}
-\label{subsec:criterios-arquitectura}
+    \item \textbf{Separar \textit{enforceability} y realización en ejecución.} Una petición correctamente permitida puede fallar porque el productor está indisponible; una petición correctamente denegada tampoco demuestra disponibilidad del sistema. El veredicto de política y el resultado de entrega se registran por separado.
 
-En relación con la arquitectura del núcleo 5G y su soporte \textit{cloud-native}, la revisión de literatura y las restricciones educativas llevan a adoptar los siguientes criterios:
+    \item \textbf{Conservar evidencia reproducible.} Configuraciones, predicciones, trazas, contadores y ensayos inválidos deben quedar asociados al perfil que los produjo. Un resultado sin precondiciones verificadas no se utiliza para confirmar una hipótesis.
+\end{enumerate}
 
-\begin{itemize}
-	\item \textbf{Uso de un núcleo 5G open-source consolidado.} Diversos \textit{testbeds} 5G de pequeña escala utilizan Open5GS como núcleo de referencia por su equilibrio entre funcionalidad, documentación y complejidad de despliegue~\cite{PerfOSS5GSA,PerfOpen5GS_K8s} (E18,E20). En esta tesis se adopta Open5GS como implementación de 5GC SA, apoyándose en esa experiencia acumulada.
-	
-	\item \textbf{Despliegue sobre Kubernetes como plataforma de orquestación.} Los estudios sobre CNFs y núcleos 5G \textit{cloud-native} coinciden en señalar a Kubernetes como plataforma de facto para despliegues en contenedores~\cite{CoreKube,CloudNativePlinth,CloudNativeB5GCore} (E01--E03). En esta tesis se toma Kubernetes como plataforma de orquestación de referencia, de modo que el entorno educativo quede alineado con las prácticas actuales de la industria.
-	
-	
-	\item \textbf{Granularidad moderada de descomposición.} Aunque algunos trabajos proponen una descomposición muy fina de las funciones de control en numerosos microservicios~\cite{CoreKube,CloudNativePlinth} (E01,E02), para fines educativos se opta por una granularidad moderada: instancias claramente identificables de AMF, SMF y UPF, empaquetadas en un número acotado de \textit{pods}. Esto permite ilustrar la separación de planos y los principios \textit{cloud-native} sin introducir una explosión de componentes difícil de manejar.
-	
-	\item \textbf{Separación lógica de slices a nivel de configuración.} Los estudios sobre \textit{network slicing} en el núcleo 5G enfatizan la asociación entre S-NSSAI, perfiles de QoS y configuración de funciones de núcleo~\cite{QoSEnabledSliceModel5G} (E09). En la plataforma propuesta, esta separación se refleja tanto en la configuración de Open5GS (por ejemplo, perfiles de QoS para \textit{slices} tipo eMBB y URLLC) como en la organización lógica de los recursos en Kubernetes (por ejemplo, \textit{namespaces} o etiquetas específicas por \textit{slice}).
-\end{itemize}
+\subsection{Delimitación experimental}
+\label{subsec:decisiones-arquitectonicas}
 
-\subsection{Criterios para los mecanismos de diferenciación y aislamiento}
-\label{subsec:criterios-mecanismos}
+El alcance se fija en un único PEP preventivo que decide al recibir la petición actual, sin exigir cooperación distribuida ni reconstrucción de eventos previos. Esta delimitación permite aislar las condiciones mínimas de decisión. Una extensión con memoria de \textit{binding} puede ser útil, pero se tratará como una ampliación y no como parte del resultado central.
 
-Los trabajos revisados muestran un amplio abanico de mecanismos para diferenciar \textit{slices} y aislar recursos: desde modelos de optimización complejos~\cite{DynQASliceMgmt} (E08) hasta extensiones avanzadas del plano de datos~\cite{NBWGuard,TimeSensitiveEBPF} (E12,E14). Dado el enfoque educativo de esta tesis, se adoptan criterios de selección conservadores:
+La plataforma experimental comparará comunicación directa e indirecta mediante SCP, dos instancias equivalentes de una función productora y PEP ubicados antes y después del proxy. Los perfiles L3/L4 permitirán observar \textit{peers} y puertos; los perfiles L7 añadirán atributos del mensaje cuando la terminación TLS lo permita. Open5GS, K3s, Cilium y UERANSIM cumplirán las funciones descritas en la Sección~\ref{sec:fundamentos}. Las versiones exactas, la topología y las configuraciones se detallarán en el capítulo de diseño.
 
-\begin{itemize}
-	\item \textbf{Priorizar mecanismos nativos de Kubernetes.} La diferenciación entre \textit{slices} se basará principalmente en configuraciones de \textit{requests} y \textit{limits} de CPU y memoria, clases internas de QoS y, de ser necesario, \textit{namespaces} y \textit{NetworkPolicies}. Estos mecanismos son suficientes para observar diferencias de rendimiento bajo contención de recursos y pueden explicarse con relativa sencillez a estudiantes familiarizados con Kubernetes.
-	
-	\item \textbf{Uso minimalista de herramientas complementarias.} Aunque la literatura muestra el potencial de eBPF, \textit{service meshes} y \textit{frameworks} de QoS avanzados~\cite{TimeSensitiveEBPF,ServiceMesh5GCoreEval,CNSFC5G,NBWGuard} (E12,E14--E16), incorporar varias de estas herramientas aumentaría significativamente la complejidad. La plataforma se limita, como máximo, a una herramienta complementaria bien integrada (por ejemplo, una CNI avanzada como Cilium), y únicamente cuando su aporte pedagógico sea claro.
-	
-	\item \textbf{Evitar marcos de optimización centralizada.} Propuestas que formulan el \textit{network slicing} como un problema de optimización global con modelos matemáticos complejos y algoritmos de resolución costosos~\cite{SurveySliceIsolation5G} (E11) se consideran poco adecuadas para un laboratorio de pregrado. La plataforma se decanta por políticas simples y estáticas o cuasi-estáticas de asignación de recursos, suficientes para demostrar el efecto de configuraciones contrastantes entre \textit{slices}.
-\end{itemize}
+\begin{table}[H]
+    \centering
+    \caption{Perfiles mínimos que debe cubrir el diseño experimental}
+    \label{tab:perfiles-minimos}
+    \small
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}
+        >{\raggedright\arraybackslash}p{2.45cm}
+        >{\raggedright\arraybackslash}p{2.6cm}
+        >{\raggedright\arraybackslash}p{2.4cm}
+        >{\raggedright\arraybackslash}X@{}}
+        \toprule
+        Dimensión & Valores mínimos & Control requerido & Propósito \\
+        \midrule
+        Trayecto SBA & Directo; indirecto mediante SCP & Misma operación lógica & Aislar el efecto de la intermediación \\
+        Estado & Sin selección; instancia seleccionada; recurso vinculado & Misma arquitectura cuando sea posible & Aislar materialización y persistencia \\
+        Ubicación del PEP & Lado consumidor; salida del SCP & Política equivalente & Comparar los observables disponibles \\
+        Capa & L3/L4; L7 & PEP confirmado en el trayecto & Separar identidad de conexión y semántica \\
+        Procedencia & Autoafirmada; derivada o autenticada & Actor comprometido definido & Distinguir discriminación funcional y segura \\
+        Resultado & Permitir; denegar; indeterminado & Control positivo y negativo & Verificar clasificación y acción \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia.}
+    \end{singlespace}
+\end{table}
 
-Estos criterios alinean los mecanismos de diferenciación con las capacidades de un entorno de laboratorio y con el objetivo de que el estudiante pueda razonar sobre la relación entre configuración y comportamiento observado.
+El diseño debe mantener constantes el \textit{intent}, la política, el lenguaje y la ubicación del PEP cuando se quiera medir el efecto causal del \textit{binding}. Si varias dimensiones cambian al mismo tiempo, el experimento será descriptivo y no permitirá atribuir el resultado a una sola causa.
 
-\subsection{Criterios para el diseño del testbed educativo}
-\label{subsec:criterios-testbed}
+\section{Bases formales para el análisis de la realizabilidad}
+\label{sec:bases-formales}
 
-La revisión de plataformas y \textit{testbeds} 5G existentes aporta información útil sobre decisiones prácticas de diseño~\cite{PerfOSS5GSA,LoFi5GMAT,ChinaChile5GLab,CompOSS_E2E5GSA,ImplSlicingOpenSource5G,PerfOpen5GS_K8s}. A partir de estos trabajos y de las restricciones planteadas en el Capítulo~1, se adoptan los siguientes criterios para el testbed educativo:
+% El espaciado de las fórmulas se controla desde config/formatting.tex.
 
-\begin{itemize}
-	\item \textbf{Uso de RAN simulada.} Siguiendo trabajos que emplean UERANSIM o srsRAN para emular la RAN y los UE en entornos de laboratorio, se opta por una RAN simulada en lugar de hardware de radiofrecuencia real, evitando así requisitos regulatorios y de equipamiento especializados.
-	
-	\item \textbf{Escala controlada del clúster.} La plataforma se diseña para operar en uno o pocos nodos de cómputo, con un número limitado de \textit{pods} y \textit{slices}, lo que permite a los estudiantes desplegar el sistema en un laboratorio universitario sin necesidad de infraestructura de nube a gran escala.
-	
-	\item \textbf{Escenarios experimentales centrados en la observación de diferencias.} En línea con trabajos que evalúan el rendimiento de núcleos \textit{open-source} en distintos escenarios~\cite{PerfOSS5GSA,PerfOpen5GS_K8s} (E18,E20), los experimentos se orientan a comparar el comportamiento de \textit{slices} configurados con perfiles de recursos diferenciados, más que a alcanzar valores absolutos de rendimiento cercanos a los de redes comerciales.
-	
-	\item \textbf{Apoyo a la docencia.} La organización de la plataforma (estructura de \textit{namespaces}, plantillas de manifiestos y scripts de despliegue) se concibe para facilitar su uso en actividades de laboratorio y en proyectos de curso, sin requerir una curva de aprendizaje propia de entornos de producción.
-	
-\end{itemize}
+\subsection{Perfil de ejecución e intent selectivo}
+\label{subsec:perfil-ejecucion}
 
-\subsection{Síntesis de los criterios}
-
-En resumen, los criterios definidos en esta sección sintetizan cómo se traducen al contexto de un laboratorio universitario las lecciones extraídas de la literatura sobre núcleos 5G \textit{cloud-native}, mecanismos de diferenciación y \textit{testbeds} educativos. Estos criterios actuarán como referencia explícita para justificar, en el capítulo de arquitectura e implementación, las decisiones tomadas sobre componentes, topología de despliegue y escenarios experimentales.
-
-
-
-
-
-
-
-
-
-\section{Métricas y consideraciones cuantitativas}
-\label{sec:metricas-consideraciones}
-
-La literatura revisada muestra que las evaluaciones de núcleos 5G y \textit{testbeds} \textit{open-source} suelen centrarse en métricas clásicas de rendimiento de red (latencia, \textit{throughput}, jitter) y en el uso de recursos de cómputo (CPU, memoria), a menudo complementadas con indicadores de aislamiento entre \textit{slices} o flujos~\cite{PerfOSS5GSA,PerfOpen5GS_K8s,NBWGuard,SurveySlicingSDNNFV} (E11,E12,E18,E20). En esta tesis, dichas métricas se adoptan con un propósito acotado: evidenciar diferencias de comportamiento entre \textit{slices} configurados con perfiles distintos, más que optimizar rigurosamente el rendimiento del sistema.
-
-\subsection{Rol de las métricas en la plataforma propuesta}
-\label{subsec:rol-metricas}
-
-El objetivo general del proyecto es diseñar e implementar una plataforma educativa que permita observar en la práctica los efectos del \textit{network slicing} en el núcleo 5G sobre una infraestructura \textit{cloud-native}. En este contexto, las métricas cuantitativas cumplen un rol principalmente demostrativo:
-
-\begin{itemize}
-	\item \textbf{Verificar diferenciación entre \textit{slices}.} Mostrar que \textit{slices} configurados con perfiles distintos de recursos (por ejemplo, uno orientado a eMBB y otro a URLLC) exhiben diferencias consistentes en latencia, \textit{throughput} y utilización de recursos cuando compiten por la misma infraestructura.
-	\item \textbf{Conectar configuración y comportamiento.} Permitir que el estudiante relacione cambios en parámetros de Kubernetes (por ejemplo, \textit{requests}/\textit{limits} de CPU) y del núcleo (por ejemplo, perfiles de QoS) con variaciones observadas en las métricas.
-	\item \textbf{Ilustrar el impacto de la contención de recursos.} Visualizar cómo la contención de CPU, memoria o ancho de banda afecta a diferentes \textit{slices} y cómo ciertas configuraciones ofrecen mayor robustez frente a dicha contención.
-\end{itemize}
-
-No se busca, por tanto, establecer garantías estrictas de cumplimiento de SLA ni resolver problemas de optimización complejos; las métricas se emplean como instrumentos de análisis y enseñanza.
-
-\subsection{Métricas de rendimiento de red}
-\label{subsec:metricas-red}
-
-Las métricas de rendimiento de red permiten caracterizar el comportamiento extremo a extremo del tráfico asociado a cada \textit{slice}. Las tres métricas principales consideradas son la latencia, el \textit{throughput} y el jitter.
-
-\subsubsection*{Latencia}
-
-La latencia o retraso extremo a extremo se define como el tiempo transcurrido entre el envío de un paquete o solicitud y la recepción de la respuesta relevante. A partir de $N$ mediciones individuales $L_1, L_2, \dots, L_N$, la latencia media se calcula como:
+Sea $r$ una petición SBA. Su perfil de ejecución se representa mediante
 \begin{equation}
-	\bar{L} = \frac{1}{N} \sum_{i=1}^{N} L_i.
+    \Pi(r) = \left(A, C(r), P, O^{\tau}(P,r), L\right),
+    \label{eq:perfil-ejecucion}
 \end{equation}
+\myequations{Perfil de ejecución de una petición SBA}%
+donde $A$ describe la arquitectura de comunicación; $C(r)$ contiene el estado de la petición; $P$ identifica la ubicación y capa del PEP; $O^{\tau}(P,r)$ es el conjunto de observables considerados confiables bajo el modelo de amenaza; y $L$ representa el lenguaje y las acciones disponibles en el mecanismo.
 
-En la plataforma propuesta, la latencia se utiliza para comparar el comportamiento de \textit{slices} bajo diferentes configuraciones de recursos y carga de tráfico, siguiendo enfoques similares a los empleados en evaluaciones de núcleos 5G \textit{open-source}~\cite{PerfOSS5GSA,PerfOpen5GS_K8s} (E18,E20).
-
-\subsubsection*{Throughput}
-
-El \textit{throughput} o tasa efectiva de datos se define, en el contexto de esta tesis, como la cantidad de información útil recibida correctamente en la capa de aplicación por el generador de tráfico asociado a un \textit{slice} (por ejemplo, el UE emulado) durante un intervalo de tiempo dado. Si durante un intervalo $\Delta t$ se transfieren $B_{\text{tx}}$ bits de datos útiles asociados a dicho \textit{slice}, el \textit{throughput} medio $T$ se aproxima como:
+El estado $C(r)$ no se reduce al modelo arquitectónico. Se expresa como
 \begin{equation}
-	T = \frac{B_{\text{tx}}}{\Delta t}.
+    C(r) = \left(c_{disc}, c_{sel}, c_{bind}, c_{resel}\right),
+    \label{eq:estado-peticion}
 \end{equation}
+\myequations{Estado de descubrimiento, selección y binding de la petición}%
+donde los componentes indican el estado de descubrimiento, selección de instancia, vinculación a un recurso y reselección. Los valores concretos dependen del procedimiento, pero deben permitir distinguir al menos entre información ausente, instancia específica seleccionada y \textit{binding} persistente.
 
-Esta métrica se emplea para observar cómo la asignación de recursos de cómputo y, eventualmente, de ancho de banda en el núcleo y en el clúster de Kubernetes afecta la capacidad de un \textit{slice} de sostener tasas de datos elevadas frente a otros \textit{slices} concurrentes.
-\subsubsection*{Jitter}
-
-El jitter mide la variación en el retraso entre paquetes sucesivos y es especialmente relevante para servicios sensibles a la variabilidad temporal. Una definición simple de jitter inter-arribo entre muestras consecutivas es:
+Un \textit{intent} selectivo se define como
 \begin{equation}
-	J_i = \left| L_i - L_{i-1} \right|, \quad i = 2, \dots, N,
+    I = \left(\mathcal{D}_{I}, \varphi_{I}, a_{I}\right),
+    \label{eq:intent-selectivo}
 \end{equation}
-donde $L_i$ es la latencia de la muestra $i$-ésima. A partir de estos valores se puede calcular, por ejemplo, un jitter medio $\bar{J}$.
+\myequations{Representación de un intent selectivo}%
+donde $\mathcal{D}_{I}$ es el conjunto de discriminadores necesarios, $\varphi_{I}$ es el predicado que los relaciona y $a_{I}$ es la acción esperada. Por ejemplo, negar peticiones de una NF consumidora comprometida hacia una instancia productora concreta requiere ambos discriminadores si otras combinaciones deben permanecer permitidas.
 
-En la plataforma, el jitter se utiliza principalmente como métrica complementaria para ilustrar que no solo importa el valor medio de la latencia, sino también su estabilidad, aspecto que puede verse afectado por la contención de recursos y la configuración de los \textit{slices}.
+\subsection{Materialización, observación y capacidad de acción}
+\label{subsec:condiciones-enforceability}
 
-\subsection{Métricas de utilización de recursos}
-\label{subsec:metricas-recursos}
-
-Además del comportamiento de red, resulta fundamental observar cómo se utilizan los recursos de cómputo del clúster, en particular CPU y memoria. Estas métricas permiten relacionar el rendimiento observado con el grado de utilización de los recursos físicos.
-
-\subsubsection*{Uso de CPU}
-
-Si se dispone de una medida del tiempo de CPU consumido por un conjunto de procesos o \textit{pods} asociados a un \textit{slice} en un intervalo de observación $T_{\text{obs}}$, es posible definir una utilización media de CPU como:
+Sea $M(r)$ el conjunto de atributos materializados antes de que el PEP deba decidir y sea $O(P,r)$ el conjunto de atributos visibles en ese punto. Los observables confiables son un subconjunto de los visibles:
 \begin{equation}
-	U_{\text{CPU}} = \frac{C_{\text{used}}}{C_{\text{max}}},
+    O^{\tau}(P,r) \subseteq O(P,r).
+    \label{eq:observables-confiables}
 \end{equation}
-donde $C_{\text{used}}$ representa la capacidad de CPU efectivamente utilizada (por ejemplo, en términos de núcleos-equivalentes o \textit{milliCPU}) y $C_{\text{max}}$ la capacidad máxima disponible para ese \textit{slice} según su configuración de \textit{requests}/\textit{limits} en Kubernetes.
+\myequations{Relación entre observables visibles y confiables}%
+La inclusión es importante porque una cabecera puede estar presente y, sin embargo, ser modificable por el actor que se pretende contener. La confianza $\tau$ no es una propiedad absoluta del nombre del campo: depende de su procedencia, de las terminaciones criptográficas y del modelo de amenaza.
 
-En términos prácticos, la plataforma se apoyará en las métricas estándar expuestas por Kubernetes y sus herramientas de monitorización para estimar la fracción de CPU consumida por los \textit{pods} de cada \textit{slice} durante los experimentos.
-
-\subsubsection*{Uso de memoria}
-
-De forma análoga, el uso de memoria se puede expresar como una fracción de la memoria reservada o de la memoria total del nodo. Si $M_{\text{used}}$ es la memoria efectivamente utilizada por los \textit{pods} de un \textit{slice} y $M_{\text{max}}$ el límite configurado o una referencia de capacidad, se tiene:
+Sean $\operatorname{Expr}(L,P)$ los predicados que el mecanismo puede expresar en el PEP y $\operatorname{Act}(P)$ las acciones preventivas que puede ejecutar. La \textit{enforceability} del intent se clasifica como realizable, denotada por $R$, cuando se cumplen simultáneamente las condiciones siguientes:
 \begin{equation}
-	U_{\text{mem}} = \frac{M_{\text{used}}}{M_{\text{max}}}.
+\begin{split}
+    \operatorname{Enf}(I\mid\Pi,r)=R \quad \Longleftrightarrow \quad
+    &\mathcal{D}_{I} \subseteq M(r) \\
+    &\land\; \mathcal{D}_{I} \subseteq O^{\tau}(P,r) \\
+    &\land\; \varphi_{I} \in \operatorname{Expr}(L,P) \\
+    &\land\; a_{I} \in \operatorname{Act}(P).
+\end{split}
+    \label{eq:enforceability}
 \end{equation}
+\myequations{Condiciones de enforceability de un intent selectivo}%
+La Ecuación~\ref{eq:enforceability} no afirma que la entrega posterior tendrá éxito. Sólo establece que el PEP dispone de información confiable y capacidad suficiente para tomar y ejecutar la decisión solicitada.
 
-Aunque la memoria suele ser menos crítica que la CPU en los escenarios educativos considerados, su observación ayuda a identificar configuraciones desequilibradas o condiciones de presión de recursos que puedan afectar al rendimiento.
+\subsection{Taxonomía de resultados negativos}
+\label{subsec:taxonomia-resultados}
 
+Un resultado no realizable se acompaña de una causa. Esta taxonomía evita agrupar como ``falta de soporte'' situaciones conceptualmente diferentes:
+\begin{align}
+    U(F_1) &: \mathcal{D}_{I} \nsubseteq M(r),
+    \label{eq:f1} \\
+    U(F_2) &: \mathcal{D}_{I} \subseteq M(r)
+              \;\land\;
+              \mathcal{D}_{I} \nsubseteq O^{\tau}(P,r),
+    \label{eq:f2} \\
+    U(F_3) &: \mathcal{D}_{I} \subseteq O^{\tau}(P,r)
+              \;\land\;
+              \left(\varphi_{I} \notin \operatorname{Expr}(L,P)
+              \;\lor\;
+              a_{I} \notin \operatorname{Act}(P)\right).
+    \label{eq:f3}
+\end{align}
+\addcontentsline{equ}{myequations}{\protect\numberline{\protect\ref{eq:f1}}Causa F1: información no materializada}
+\addcontentsline{equ}{myequations}{\protect\numberline{\protect\ref{eq:f2}}Causa F2: información no observable de forma confiable}
+\addcontentsline{equ}{myequations}{\protect\numberline{\protect\ref{eq:f3}}Causa F3: predicado o acción no soportados}
 
-\section{Reflexión final del capítulo}
-\label{sec:reflexion-final-cap2}
+$F_1$ indica que un discriminador aún no existe al momento de decidir. $F_2$ indica que existe, pero el PEP no lo observa con la confianza requerida; incluye información no visible, oculta por cifrado o autoafirmada por un actor no confiable. $F_3$ indica que la información confiable está disponible, pero el lenguaje o el mecanismo no puede representar el predicado o ejecutar la acción.
 
-En este capítulo se han presentado los elementos conceptuales y metodológicos que sustentan la propuesta de plataforma educativa. En el plano teórico, se delimitó el foco en el núcleo 5G \textit{Standalone} desplegado sobre una infraestructura \textit{cloud-native}, destacando el papel de funciones como AMF, SMF y UPF y la forma en que el \textit{network slicing} se materializa mediante perfiles de servicio y la asignación diferenciada de recursos. Asimismo, se revisaron los mecanismos nativos de diferenciación y aislamiento de Kubernetes, junto con la integración conceptual con Open5GS en un escenario de laboratorio.
+El estado \textit{indeterminado} se utiliza cuando el PEP no puede decidir selectivamente entre los casos que el intent exige separar. En cambio, una falla posterior de ruta, timeout o indisponibilidad del productor se registra como \texttt{RUNTIME\_REALIZATION\_FAILURE}. Esta última no se añade como una cuarta causa de no realizabilidad porque la decisión de política pudo haber sido correcta.
 
-Desde la perspectiva metodológica, la revisión sistemática de literatura permitió organizar los trabajos existentes en torno a las preguntas PI1--PI4, seleccionar 20 estudios núcleo y sintetizar sus aportes en una matriz de extracción y en un conjunto de criterios de diseño. Estos criterios respaldan la elección de un núcleo 5G \textit{open-source} (Open5GS), el despliegue sobre Kubernetes, una descomposición funcional de granularidad moderada y el uso predominante de mecanismos nativos de control de recursos, priorizando la simplicidad operativa y la claridad de los mecanismos frente a la complejidad propia de despliegues de operador.
+\begin{figure}[H]
+    \centering
+    \input{figures/chapter2/cadena_decision_enforceability.tex}
+    \caption{Cadena diagnóstica para clasificar la realizabilidad.}
+    \label{fig:cadena-enforceability}
+    \notafuente{Elaboración propia.}
+\end{figure}
 
-Por último, la selección de métricas cuantitativas (latencia, \textit{throughput}, jitter y utilización de CPU y memoria) se orienta a hacer observable, en un entorno de laboratorio, la diferenciación entre \textit{slices} cuando comparten una misma infraestructura. Sobre esta base, el siguiente capítulo desarrolla la arquitectura lógica y física de la plataforma propuesta, mientras que los capítulos posteriores emplearán las métricas definidas para evaluar en qué medida dicha plataforma permite evidenciar, de forma sistemática y reproducible, los efectos del \textit{network slicing} en un núcleo 5G \textit{cloud-native} con fines formativos.
+\subsection{Hipótesis causal sobre el estado de binding}
+\label{subsec:hipotesis-binding}
+
+El modelo permite formular una comparación controlada. Sean $\Pi_u$ y $\Pi_b$ dos perfiles con la misma arquitectura $A$, PEP $P$, lenguaje $L$, intent y texto de política. La única diferencia es el estado de la petición: $C_u$ no tiene una instancia productora materializada y $C_b$ contiene una instancia seleccionada o vinculada. Para un intent que requiere identificar al productor se plantea la predicción
+\begin{equation}
+\begin{gathered}
+    \Pi_u = \left(A,C_u,P,O_u^{\tau},L\right), \qquad
+    \Pi_b = \left(A,C_b,P,O_b^{\tau},L\right), \\
+    \operatorname{Enf}(I\mid\Pi_u,r_u)=U(F_1), \qquad
+    \operatorname{Enf}(I\mid\Pi_b,r_b)=R,
+\end{gathered}
+    \label{eq:hipotesis-binding}
+\end{equation}
+\myequations{Predicción causal asociada al cambio de binding}%
+siempre que el nuevo discriminador sea confiablemente observable y el mecanismo pueda accionarlo. La condición final impide concluir que todo \textit{binding} produce realizabilidad: la selección materializa información, pero no garantiza que esa información atraviese la frontera del PEP ni que el lenguaje pueda utilizarla.
+
+\subsection{Métricas para la validación}
+\label{subsec:metricas-validacion}
+
+La evaluación cuantitativa se centra en la calidad de la decisión, no en maximizar rendimiento. Sea $N_{\mathrm{valid}}$ el número de ensayos con precondiciones verificadas; $N_{\mathrm{allow}}$, $N_{\mathrm{deny}}$ y $N_{\mathrm{ind}}$ los resultados de permitir, denegar e indeterminado; y $N_{\mathrm{correct}}$ las decisiones que coinciden con el oráculo del escenario. Se definen:
+\begin{align}
+    C_{\mathrm{dec}} &=
+        \frac{N_{\mathrm{allow}}+N_{\mathrm{deny}}}{N_{\mathrm{valid}}},
+    \label{eq:cobertura-decision} \\
+    R_{\mathrm{ind}} &=
+        \frac{N_{\mathrm{ind}}}{N_{\mathrm{valid}}},
+    \label{eq:tasa-indeterminada} \\
+    C_{\mathrm{corr}} &=
+        \frac{N_{\mathrm{correct}}}{N_{\mathrm{allow}}+N_{\mathrm{deny}}}.
+    \label{eq:correccion-decision}
+\end{align}
+\addcontentsline{equ}{myequations}{\protect\numberline{\protect\ref{eq:cobertura-decision}}Cobertura de decisión}
+\addcontentsline{equ}{myequations}{\protect\numberline{\protect\ref{eq:tasa-indeterminada}}Tasa de resultados indeterminados}
+\addcontentsline{equ}{myequations}{\protect\numberline{\protect\ref{eq:correccion-decision}}Corrección entre decisiones emitidas}
+
+$C_{\mathrm{dec}}$ mide qué fracción de los ensayos válidos recibe una decisión binaria. $R_{\mathrm{ind}}$ cuantifica los casos que el perfil no puede discriminar. $C_{\mathrm{corr}}$ evita que una cobertura alta oculte decisiones incorrectas y sólo se calcula cuando existe al menos una decisión emitida. Cuando se mida el costo operativo del PEP, se reportará de forma secundaria la diferencia de tiempo respecto de un perfil base:
+\begin{equation}
+    \Delta t_{\mathrm{PEP}} = t_{\mathrm{con\ PEP}} - t_{\mathrm{base}}.
+    \label{eq:sobrecarga-pep}
+\end{equation}
+\myequations{Diferencia temporal asociada al PEP}%
+$\Delta t_{\mathrm{PEP}}$ sólo se comparará entre ejecuciones con igual topología, carga y procedimiento; no mide realizabilidad, pues una decisión correcta puede tener mayor o menor latencia.
+
+\section{Síntesis y enlace con el diseño}
+\label{sec:cierre-cap2}
+
+Los 72 estudios incluidos distribuyen el control de la SBA entre proxies L7, microsegmentación, mecanismos criptográficos, monitores en el SCP, autorización descentralizada, análisis de código y verificación formal. Cada familia observa atributos distintos, actúa en otro punto del trayecto y adopta supuestos propios sobre confianza y estado. Sus resultados son complementarios, pero no intercambiables.
+
+La principal consecuencia para esta tesis es que la existencia de una política no demuestra que un PEP pueda ejecutarla. Antes deben verificarse la materialización del discriminador, su observación confiable y la capacidad del mecanismo para representar y accionar el predicado. Esta secuencia sustenta el perfil $\Pi=(A,C,P,O^{\tau},L)$ y las causas $F_1$, $F_2$ y $F_3$. También obliga a separar el veredicto de política de una falla posterior de entrega.
+
+El capítulo siguiente trasladará estos criterios a la arquitectura experimental. Allí se especificarán los componentes, los perfiles de comunicación, las ubicaciones del PEP, el modelo de amenaza y el procedimiento de instrumentación. La validación posterior contrastará predicciones previamente definidas y conservará los controles necesarios para atribuir los cambios observados al estado de selección y \textit{binding}, y no a variaciones accidentales de la plataforma.

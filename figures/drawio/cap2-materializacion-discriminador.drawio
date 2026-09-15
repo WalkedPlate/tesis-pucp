@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="Materializacion del discriminador">
+    <mxGraphModel dx="1500" dy="950" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="880" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="2" value="Petición inicial&#xa;sin destino específico" style="swimlane;horizontal=0;startSize=40;html=1;whiteSpace=wrap;fillColor=none;strokeColor=#7A7A7A;strokeWidth=2;fontFamily=Times New Roman;fontSize=13;fontStyle=1;fontColor=#333333;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="90" width="1320" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="20" value="NRF" style="shape=cylinder3;boundedLbl=1;backgroundOutline=1;size=12;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#7A7A7A;strokeWidth=2;fontColor=#333333;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="2">
+          <mxGeometry x="510" y="15" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="21" value="NF consumidora" style="rounded=1;absoluteArcSize=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;strokeWidth=2;fontColor=#1F3A5F;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="2">
+          <mxGeometry x="50" y="130" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="22" value="PEP previo&#xa;al SCP" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;strokeWidth=2;fontColor=#6E4E17;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="2">
+          <mxGeometry x="300" y="130" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="23" value="SCP" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#7A7A7A;strokeWidth=3;fontColor=#333333;fontFamily=Times New Roman;fontSize=13;verticalAlign=top;spacingTop=6;" vertex="1" parent="2">
+          <mxGeometry x="510" y="115" width="150" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="24" value="selección" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B58133;strokeWidth=2;dashed=1;dashPattern=6 3;fontColor=#6E4E17;fontFamily=Times New Roman;fontSize=11;" vertex="1" parent="23">
+          <mxGeometry x="20" y="55" width="110" height="38" as="geometry" />
+        </mxCell>
+        <mxCell id="25" value="PEP posterior&#xa;al SCP" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;strokeWidth=2;fontColor=#6E4E17;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="2">
+          <mxGeometry x="720" y="130" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="26" value="UDM_a" style="rounded=1;absoluteArcSize=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;strokeWidth=2;fontColor=#1F3A5F;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="2">
+          <mxGeometry x="930" y="130" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="27" value="identidad de la instancia productora: aún no materializada" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;strokeWidth=2;dashed=1;dashPattern=8 4;fontColor=#7B2A21;fontFamily=Times New Roman;fontSize=11;" vertex="1" parent="2">
+          <mxGeometry x="50" y="245" width="400" height="34" as="geometry" />
+        </mxCell>
+        <mxCell id="28" value="materializada" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDF5F0;strokeColor=#3B7A57;strokeWidth=2;fontColor=#2A5A40;fontFamily=Times New Roman;fontSize=11;" vertex="1" parent="2">
+          <mxGeometry x="720" y="245" width="370" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="3" value="Petición posterior&#xa;asociada a un recurso" style="swimlane;horizontal=0;startSize=40;html=1;whiteSpace=wrap;fillColor=none;strokeColor=#7A7A7A;strokeWidth=2;fontFamily=Times New Roman;fontSize=13;fontStyle=1;fontColor=#333333;pointerEvents=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="420" width="1320" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="31" value="NF consumidora" style="rounded=1;absoluteArcSize=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;strokeWidth=2;fontColor=#1F3A5F;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="3">
+          <mxGeometry x="50" y="50" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="32" value="PEP previo&#xa;al SCP" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;strokeWidth=2;fontColor=#6E4E17;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="3">
+          <mxGeometry x="300" y="50" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="33" value="SCP" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#7A7A7A;strokeWidth=3;fontColor=#333333;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="3">
+          <mxGeometry x="510" y="50" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="34" value="PEP posterior&#xa;al SCP" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;strokeWidth=2;fontColor=#6E4E17;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="3">
+          <mxGeometry x="720" y="50" width="150" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="35" value="UDM_a" style="rounded=1;absoluteArcSize=1;arcSize=8;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;strokeWidth=2;fontColor=#1F3A5F;fontFamily=Times New Roman;fontSize=13;" vertex="1" parent="3">
+          <mxGeometry x="930" y="50" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="36" value="identidad de la instancia productora: materializada desde que el consumidor emite la petición" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#EDF5F0;strokeColor=#3B7A57;strokeWidth=2;fontColor=#2A5A40;fontFamily=Times New Roman;fontSize=11;" vertex="1" parent="3">
+          <mxGeometry x="50" y="165" width="1040" height="34" as="geometry" />
+        </mxCell>
+
+        <mxCell id="50" value="" style="shape=table;startSize=0;container=1;collapsible=0;childLayout=tableLayout;fixedRows=1;rowLines=1;columnLines=1;html=1;whiteSpace=wrap;strokeColor=#7A7A7A;strokeWidth=2;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="40" y="690" width="940" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="51" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;top=0;left=0;right=0;bottom=0;" vertex="1" parent="50">
+          <mxGeometry width="940" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="511" value="Estado de la petición" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#F2F2F2;top=0;left=0;bottom=0;right=0;align=center;fontStyle=1;fontFamily=Times New Roman;fontSize=12;fontColor=#333333;" vertex="1" parent="51">
+          <mxGeometry width="300" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="512" value="PEP previo al SCP" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#F2F2F2;top=0;left=0;bottom=0;right=0;align=center;fontStyle=1;fontFamily=Times New Roman;fontSize=12;fontColor=#333333;" vertex="1" parent="51">
+          <mxGeometry x="300" width="320" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="513" value="PEP posterior al SCP" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#F2F2F2;top=0;left=0;bottom=0;right=0;align=center;fontStyle=1;fontFamily=Times New Roman;fontSize=12;fontColor=#333333;" vertex="1" parent="51">
+          <mxGeometry x="620" width="320" height="44" as="geometry" />
+        </mxCell>
+        <mxCell id="52" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;top=0;left=0;right=0;bottom=0;" vertex="1" parent="50">
+          <mxGeometry y="44" width="940" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="521" value="Inicial, sin destino específico" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=10;fontFamily=Times New Roman;fontSize=12;fontColor=#333333;" vertex="1" parent="52">
+          <mxGeometry width="300" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="522" value="No dispone del discriminador" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#FBEDEB;top=0;left=0;bottom=0;right=0;align=center;fontFamily=Times New Roman;fontSize=12;fontColor=#7B2A21;" vertex="1" parent="52">
+          <mxGeometry x="300" width="320" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="523" value="Dispone del discriminador" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#EDF5F0;top=0;left=0;bottom=0;right=0;align=center;fontFamily=Times New Roman;fontSize=12;fontColor=#2A5A40;" vertex="1" parent="52">
+          <mxGeometry x="620" width="320" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="53" value="" style="shape=tableRow;horizontal=0;startSize=0;swimlaneHead=0;swimlaneBody=0;fillColor=none;collapsible=0;dropTarget=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;top=0;left=0;right=0;bottom=0;" vertex="1" parent="50">
+          <mxGeometry y="92" width="940" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="531" value="Posterior, asociada a un recurso" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=none;top=0;left=0;bottom=0;right=0;align=left;spacingLeft=10;fontFamily=Times New Roman;fontSize=12;fontColor=#333333;" vertex="1" parent="53">
+          <mxGeometry width="300" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="532" value="Dispone del discriminador" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#EDF5F0;top=0;left=0;bottom=0;right=0;align=center;fontFamily=Times New Roman;fontSize=12;fontColor=#2A5A40;" vertex="1" parent="53">
+          <mxGeometry x="300" width="320" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="533" value="Dispone del discriminador" style="shape=partialRectangle;html=1;whiteSpace=wrap;connectable=0;overflow=hidden;fillColor=#EDF5F0;top=0;left=0;bottom=0;right=0;align=center;fontFamily=Times New Roman;fontSize=12;fontColor=#2A5A40;" vertex="1" parent="53">
+          <mxGeometry x="620" width="320" height="48" as="geometry" />
+        </mxCell>
+
+        <mxCell id="60" value="Leyenda" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#9A9A9A;verticalAlign=top;align=left;spacingLeft=10;fontStyle=1;fontFamily=Times New Roman;fontSize=12;fontColor=#4D4D4D;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="690" width="350" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="61" value="" style="rounded=1;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;strokeWidth=2;" vertex="1" parent="60">
+          <mxGeometry x="12" y="32" width="34" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="62" value="función de red" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontColor=#4D4D4D;" vertex="1" parent="60">
+          <mxGeometry x="56" y="30" width="130" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="63" value="" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;html=1;fillColor=#FBF3E4;strokeColor=#B58133;strokeWidth=2;" vertex="1" parent="60">
+          <mxGeometry x="12" y="60" width="34" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="64" value="punto de ejecución" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontColor=#4D4D4D;" vertex="1" parent="60">
+          <mxGeometry x="56" y="58" width="130" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="65" value="" style="rounded=0;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;strokeWidth=2;dashed=1;dashPattern=8 4;" vertex="1" parent="60">
+          <mxGeometry x="190" y="32" width="34" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="66" value="dato no materializado" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Times New Roman;fontSize=11;fontColor=#4D4D4D;" vertex="1" parent="60">
+          <mxGeometry x="234" y="30" width="110" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="67" value="" style="rounded=0;html=1;fillColor=#EDF5F0;strokeColor=#3B7A57;strokeWidth=2;" vertex="1" parent="60">
+          <mxGeometry x="190" y="60" width="34" height="18" as="geometry" />
+        </mxCell>
+        <mxCell id="68" value="dato materializado" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Times New Roman;fontSize=11;fontColor=#4D4D4D;" vertex="1" parent="60">
+          <mxGeometry x="234" y="58" width="110" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="69" value="Los cuatro elementos del trayecto son los mismos en ambas filas. Sólo cambia el estado de la petición." style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;fontFamily=Times New Roman;fontSize=11;fontColor=#777777;" vertex="1" parent="60">
+          <mxGeometry x="12" y="92" width="330" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="70" value="petición" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=2;strokeColor=#5A5A5A;fontColor=#666666;fontFamily=Times New Roman;fontSize=11;verticalAlign=bottom;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="21" target="22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="71" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=2;strokeColor=#5A5A5A;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="22" target="23">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="72" value="descubrimiento delegado" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=openThin;startArrow=openThin;endSize=10;startSize=10;dashed=1;dashPattern=6 3;strokeWidth=1;strokeColor=#7A7A7A;fontColor=#777777;fontFamily=Times New Roman;fontSize=11;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="23" target="20">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="73" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=2;strokeColor=#5A5A5A;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="23" target="25">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="74" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=2;strokeColor=#5A5A5A;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="25" target="26">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="80" value="Target-apiRoot" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=3;strokeColor=#3B7A57;fontColor=#2A5A40;fontFamily=Times New Roman;fontSize=11;verticalAlign=bottom;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="31" target="32">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="81" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=3;strokeColor=#3B7A57;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="32" target="33">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="82" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=3;strokeColor=#3B7A57;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="33" target="34">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="83" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endSize=8;strokeWidth=3;strokeColor=#3B7A57;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="34" target="35">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

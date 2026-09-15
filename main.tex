@@ -1,110 +1,80 @@
 \documentclass[12pt,a4paper,oneside]{book}
 
-% Configuraciones y paquetes
+% Configuración general del documento.
 \input{config/packages}
 \input{config/formatting}
 \input{config/commands}
 
-% Información del documento
-\title{[TÍTULO DEL TRABAJO DE TESIS]}
-\author{[NOMBRE COMPLETO DEL AUTOR]}
-\date{Lima, \today}
-
 \begin{document}
-	
-	% =====================================
-	% CARÁTULA
-	% =====================================
-	\pagenumbering{gobble}
-	\input{content/00-frontmatter/caratula}
-	
-	% =====================================
-	% INFORME DE SIMILITUD
-	% =====================================
-	%\input{content/00-frontmatter/informe-similitud}
-	
-	% =====================================
-	% DEDICATORIA Y AGRADECIMIENTOS
-	% =====================================
-	\input{content/00-frontmatter/dedicatoria}
-	\input{content/00-frontmatter/agradecimientos}
-	
-	% =====================================
-	% INICIA NUMERACIÓN ROMANA
-	% =====================================
-	\pagenumbering{roman}
-	\setcounter{page}{1}
-	
-	% DEDICATORIA Y AGRADECIMIENTOS
-	\addcontentsline{toc}{chapter}{DEDICATORIA}
-	\addcontentsline{toc}{chapter}{AGRADECIMIENTOS}
-	
-	% RESUMEN (página i, arriba)
-	\input{content/00-frontmatter/resumen}
-	
-	% ABSTRACT + KEYWORDS (página ii, arriba)
-	\input{content/00-frontmatter/abstract}
-	
-	% =====================================
-	% ÍNDICES (numeración romana continúa, arriba)
-	% =====================================
-	
-	% Índice General
-	\addcontentsline{toc}{chapter}{ÍNDICE GENERAL}
-	\tableofcontents
-	\clearpage
-	
-	% Índice de Tablas
-	\addcontentsline{toc}{chapter}{ÍNDICE DE TABLAS}
-	\listoftables
-	\clearpage
-	
-	% Índice de Figuras  
-	\addcontentsline{toc}{chapter}{ÍNDICE DE FIGURAS}
-	\listoffigures
-	\clearpage
-	
-	% Índice de Ecuaciones
-	%\addcontentsline{toc}{chapter}{ÍNDICE DE ECUACIONES}
-	%\listofmyequations
-	%\clearpage
-	
-	% Glosario
-	\input{content/00-frontmatter/glosario}
-	
-	% =====================================
-	% CONTENIDO PRINCIPAL (numeración arábiga)
-	% =====================================
-	\mainmatter
-	
-	% Introducción
-	\input{content/01-introduccion/introduccion}
-	
-	% Capítulos
-	\input{content/02-capitulo1/capitulo1}
-	\input{content/03-capitulo2/capitulo2}  
-	%\input{content/04-capitulo3/capitulo3}
-	%\input{content/05-capitulo4/capitulo4}
-	
-	% =====================================
-	% PÁGINAS FINALES
-	% =====================================
-	\backmatter
-	
-	% Conclusiones
-	%\input{content/99-backmatter/conclusiones}
-	
-	% Recomendaciones
-	% \input{content/99-backmatter/recomendaciones}
-	
-	% Bibliografía
-	\chapter*{REFERENCIAS BIBLIOGRÁFICAS}
-	\addcontentsline{toc}{chapter}{REFERENCIAS BIBLIOGRÁFICAS}
-	%\nocite{*}
-	\printbibliography[heading=none]
-	
-	% Anexos
-	%\appendix
-	% \input{content/99-backmatter/anexos}
-	
+    % =========================================================================
+    % PÁGINAS PRELIMINARES SIN NUMERACIÓN
+    % =========================================================================
+
+    \pagenumbering{gobble}
+    \input{content/00-frontmatter/caratula}
+
+    % \input{content/00-frontmatter/informe-similitud}
+
+    \input{content/00-frontmatter/dedicatoria}
+    \input{content/00-frontmatter/agradecimientos}
+
+    % =========================================================================
+    % PÁGINAS PRELIMINARES CON NUMERACIÓN ROMANA
+    % =========================================================================
+
+    \frontmatter
+    \input{content/00-frontmatter/resumen}
+    \input{content/00-frontmatter/abstract}
+
+    % Índice general.
+    \phantomsection
+    \addcontentsline{toc}{chapter}{ÍNDICE GENERAL}
+    \tableofcontents
+    \clearpage
+
+    % Índice de tablas.
+    \phantomsection
+    \addcontentsline{toc}{chapter}{ÍNDICE DE TABLAS}
+    \listoftables
+    \clearpage
+
+    % Índice de figuras.
+    \phantomsection
+    \addcontentsline{toc}{chapter}{ÍNDICE DE FIGURAS}
+    \listoffigures
+    \clearpage
+
+    % Índice de ecuaciones.
+    % \phantomsection
+    % \addcontentsline{toc}{chapter}{ÍNDICE DE ECUACIONES}
+    % \listofmyequations
+    % \clearpage
+
+    \input{content/00-frontmatter/glosario}
+
+    % =========================================================================
+    % CONTENIDO PRINCIPAL CON NUMERACIÓN ARÁBIGA
+    % =========================================================================
+
+    \mainmatter
+    \input{content/01-introduccion/introduccion}
+    \input{content/02-capitulo1/capitulo1}
+    \input{content/03-capitulo2/capitulo2}
+    % \input{content/04-capitulo3/capitulo3}
+    % \input{content/05-capitulo4/capitulo4}
+
+    % =========================================================================
+    % PÁGINAS FINALES
+    % =========================================================================
+
+    \backmatter
+    \setupbackmatter
+
+    % \input{content/99-backmatter/conclusiones}
+    % \input{content/99-backmatter/recomendaciones}
+
+    \input{bibliography/bibliography}
+
+    % \appendix
+    % \input{content/99-backmatter/anexos}
 \end{document}

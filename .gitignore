@@ -7,14 +7,31 @@ desktop.ini
 # Ignorar la carpeta
 REVISIONES_PROPUESTAS_PDF/
 
-# Ignorar archivos generados por LaTeX 
+# Archivos generados por LaTeX y Biber
 *.aux
+*.bbl
+*.bcf
+*.blg
+*.equ
+*.fdb_latexmk
+*.fls
 *.lof
 *.lot
 *.out
 *.log
 *.pdf
+*.run.xml
 *.synctex.gz
 *.toc
+*.xdv
 
+# Material de trabajo y salidas intermedias (no forma parte del documento)
+fuente-de-verdad/
+outputs/
+tmp/
+.tmp/
+.tmp.driveupload/
+.tmp_7_sedes_lima/
 
+# Exportaciones de los diagramas: se regeneran desde los .drawio
+figures/drawio/export/

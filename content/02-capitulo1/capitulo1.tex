@@ -1,292 +1,229 @@
-\chapter{Planteamiento del Problema}
+\chapter{Caracterización del desafío de aplicar políticas de contención selectiva desde un punto de ejecución en el núcleo de red 5G}
 \label{chap:planteamiento}
 
-Este capítulo caracteriza la dificultad para la experimentación práctica con \textit{network slicing} 5G en entornos académicos. Se identifica una brecha de accesibilidad entre las soluciones comerciales, caracterizadas por su alto costo y limitada transparencia técnica, y las alternativas \textit{open-source} de grado operador, de elevada complejidad operacional. El capítulo establece el área académica del proyecto, analiza estas brechas, y define los objetivos y alcances que enmarcan el desarrollo de este trabajo.
+Este capítulo presenta el problema de ingeniería que motiva la tesis y delimita la contribución propuesta. El análisis parte de una dificultad propia del núcleo 5G basado en servicios: una política puede expresar qué comunicación debe bloquearse, pero el punto encargado de aplicarla no siempre dispone, en ese momento, de información suficiente y confiable para distinguirla. A partir de este problema se formulan la pregunta de investigación, la hipótesis de trabajo, los objetivos, el alcance y las consideraciones no técnicas que orientan el estudio.
 
 \newpage
 
+\section{Identificación del desafío de ingeniería}
+\label{sec:desafio-ingenieria}
 
-\section{Área Académica y Contexto}
+\subsection{Área académica}
 
-\subsection{Área Académica de la Ingeniería de Telecomunicación}
+La tesis se inscribe principalmente en el área de Ciberseguridad de la Ingeniería de Telecomunicación. Su dominio de aplicación es el 5G Core, en particular la arquitectura basada en servicios (\textit{Service-Based Architecture}, SBA), donde las funciones de red producen y consumen servicios mediante interfaces normalizadas. Esta arquitectura favorece la modularidad, pero también distribuye las decisiones de descubrimiento, selección, enrutamiento y autorización entre varias funciones e intermediarios~\cite{ETSI_TS_123501_R16,ETSI_TS_129500_R16}.
 
-El presente trabajo se inscribe en el área académica de Redes, Sistemas y Servicios Móviles, dominio dedicado a planificar y optimizar la conectividad y servicios en redes celulares. Esta área abarca el diseño, implementación y gestión de infraestructuras de comunicaciones móviles, desde redes de generaciones anteriores hasta las arquitecturas 5G contemporáneas.
+El vínculo con la ciberseguridad surge de la necesidad de controlar qué función puede comunicarse con qué servicio o instancia y bajo qué condiciones. La arquitectura de seguridad de 5G contempla autenticación, autorización y protección de las comunicaciones entre funciones~\cite{ETSI_TS_133501_R16}. Sin embargo, la existencia de estos mecanismos no resuelve por sí sola la aplicación de una regla selectiva en cualquier punto de la red. Para decidir, el mecanismo debe reconocer los atributos que distinguen la petición y debe poder ejecutar la acción requerida antes de que la operación llegue a su destino.
 
-Esta tesis pertenece a dicha área porque aborda uno de sus desafíos contemporáneos fundamentales: la experimentación práctica con tecnologías habilitadoras de redes móviles de quinta generación. Específicamente, el proyecto se centra en el \textit{network slicing}, una capacidad fundamental de 5G definida por 3GPP (\textit{3rd Generation Partnership Project}) que permite crear múltiples redes lógicas independientes sobre infraestructura física compartida \cite{3GPP2018}. El \textit{network slicing} representa uno de los pilares arquitectónicos que distinguen a 5G de generaciones anteriores, permitiendo que las redes móviles soporten casos de uso diversos con requisitos heterogéneos de calidad de servicio \cite{Popovski2018,Foukas2017}. Además, el proyecto aborda la orquestación y gestión del ciclo de vida de estos \textit{slices} en el contexto del 5G \textit{Core Network}, componente central de la arquitectura de sistemas móviles 5G \textit{Standalone}, consolidando su pertenencia al dominio de redes, sistemas y servicios móviles.
+\subsection{Problema de investigación}
+\label{subsec:problema-investigacion}
 
-\subsection{Caracterización de la Problemática}
+\subsubsection*{Contexto del problema}
 
-\subsubsection*{Contexto del \textit{Network Slicing} en 5G}
+En la SBA, una función de red consumidora puede comunicarse directamente con una función productora o hacerlo mediante un \textit{Service Communication Proxy} (SCP). Dependiendo del modelo de comunicación y del estado de la petición, la instancia productora puede haber sido seleccionada por el consumidor, por el SCP o quedar asociada a un recurso creado previamente. Por ello, el destino lógico de una operación no siempre coincide con el \textit{peer} de red que observa un control L3/L4. Tampoco toda cabecera visible en L7 constituye una identidad confiable: si el propio actor que se desea controlar puede escribirla o modificarla, la cabecera permite diferenciar mensajes, pero no autentica su procedencia.
 
-El \textit{network slicing} es una de las capacidades habilitadoras fundamentales de las redes 5G, definido por 3GPP como la creación de múltiples redes lógicas independientes (\textit{slices}) sobre una infraestructura física compartida \cite{3GPP2018}. A diferencia de generaciones anteriores de redes móviles que proporcionaban conectividad homogénea, el \textit{network slicing} permite que una infraestructura de red compartida soporte simultáneamente servicios con requisitos diferentes de calidad de servicio, desde \textit{streaming} de video de ultra alta definición hasta control industrial en tiempo real \cite{Popovski2018,Foukas2017}.
-
-3GPP define tres categorías principales de \textit{slices}, caracterizados por el SST (\textit{Service and Slice Type}), cada uno optimizado para diferentes casos de uso y verticales industriales \cite{3GPP2018,Saboorian2017}
-. La Tabla \ref{tab:slices-caracteristicas} resume las características fundamentales de estos tipos de \textit{slice}.
-
-
-{\footnotesize
-	\renewcommand{\arraystretch}{0.95}
-	\begin{spacing}{1.55}
-		
-		\begin{table}[H]
-			\centering
-			\caption{Características de tipos de \textit{network slices} 5G según especificaciones 3GPP}
-			\label{tab:slices-caracteristicas}
-			
-			\begin{tabularx}{\textwidth}{|l|c|X|c|c|}
-				\hline
-%				\rowcolor{lightgray}
-				\textbf{Tipo de} & \textbf{SST} & \textbf{Casos de Uso} & \textbf{Latencia} & \textbf{Throughput} \\
-				\textbf{Slice} & \textbf{Value} & \textbf{Principales} & & \\
-				\hline
-				eMBB & 1 & Video 4K/8K, realidad virtual, \textit{cloud gaming} & $<$ 100 ms & Muy alto (1+ Gbps) \\
-				\hline
-				URLLC & 2 & Cirugía remota, vehículos autónomos, control industrial & $\approx$ 1 ms & Moderado (10-100 Mbps) \\
-				\hline
-				mMTC & 3 & Sensores IoT distribuidos, \textit{smart cities}, agricultura inteligente & Decenas--cientos ms  & Bajo ($<$ 1 Mbps) \\
-				\hline
-			\end{tabularx}
-			
-			\vspace{0.3cm}
-			\small Fuente: Elaboración propia basada en \cite{Popovski2018,3GPP2018}
-		\end{table}
-		
-	\end{spacing}
-}
-
-La implementación de \textit{network slicing} requiere mecanismos de diferenciación en múltiples planos de la arquitectura de red: el núcleo de red (5G \textit{Core}), el transporte, y la RAN. En el plano del \textit{core} de red, la diferenciación se materializa mediante políticas de QoS, aislamiento de recursos computacionales y de red, y gestión independiente del ciclo de vida de cada \textit{slice} \cite{Foukas2017,3GPP2018}. La Figura \ref{fig:slices-casos-uso} ilustra la arquitectura de \textit{network slicing} 5G, mostrando cómo los tres tipos de \textit{slices} (eMBB, mMTC, URLLC) se despliegan sobre una infraestructura compartida de RAN y son orquestados a través de C-RAN para servir diferentes aplicaciones con requisitos heterogéneos.
+Esta distinción resulta relevante para los \textit{intents} de contención selectiva. Considérese una política que deba bloquear las peticiones dirigidas a una instancia productora concreta, por ejemplo \texttt{UDM\_a}, y permitir las dirigidas a otra instancia equivalente, \texttt{UDM\_b}. El lenguaje de políticas puede admitir ese predicado y, aun así, el punto de ejecución de políticas (\textit{Policy Enforcement Point}, PEP) puede carecer de la identidad seleccionada cuando toma la decisión. La información también puede existir en otro componente, quedar oculta por el cifrado, perder su procedencia al atravesar un intermediario o no ser accionable por el mecanismo disponible.
 
 \begin{figure}[H]
-	\centering
-	\includegraphics[width=0.8\textwidth]{/chapter1/malta2024-fig1.jpg}
-	\caption{Panorama de \textit{network slicing} 5G mostrando los tres tipos de \textit{slices}}
-	\label{fig:slices-casos-uso}
-	
-	\vspace{0.3cm}
-	\small Fuente: Tomado de \cite{Malta2024}
+    \centering
+    \input{figures/chapter1/problema_contencion_selectiva.tex}
+    \caption{Problema de contención selectiva y puntos de observación en un trayecto SBA indirecto.}
+    \label{fig:problema-contencion-selectiva}
+    \notafuente{Elaboración propia con base en la arquitectura SBA de 3GPP~\cite{ETSI_TS_123501_R16,ETSI_TS_129500_R16}.}
 \end{figure}
 
-\subsubsection*{Brecha de Accesibilidad Tecnológica}
+La ubicación del PEP forma parte del problema, como se aprecia en la Figura~\ref{fig:problema-contencion-selectiva}. El control anterior al SCP y el control situado a su salida observan tramos distintos de la misma comunicación. La selección de la instancia, la intermediación y la procedencia de los atributos pueden cambiar la información disponible en cada punto.
 
-La experimentación práctica con \textit{network slicing} 5G es fundamental para la formación de profesionales en telecomunicaciones, sin embargo, esta se ve  obstaculizada por barreras de accesibilidad que afectan particularmente a instituciones educativas. Las soluciones de orquestación de \textit{network slicing} de grado operador, desarrolladas por fabricantes de equipamiento de telecomunicaciones (Ericsson Orchestrator, Nokia NetAct, Huawei iMaster), son sistemas propietarios diseñados para redes de producción de operadores móviles que presentan múltiples barreras para uso académico.
+La literatura confirma que el control de acceso interno del 5G Core presenta problemas de granularidad y sobreprivilegio. Los análisis estáticos y formales han identificado permisos excesivos y debilidades en la vinculación entre funciones, credenciales y operaciones~\cite{E0030,E0066,E0036}. Otras propuestas aplican controles mediante mallas de servicios, microsegmentación, proxies locales o monitores integrados en el SCP~\cite{E0004,E0019,E0045,E0061,E0069}. Los mecanismos propuestos operan en puntos distintos y parten de observables y supuestos de confianza que no son equivalentes.
 
-Estas plataformas comerciales involucran costos de licenciamiento significativos, además de requerir contratos de soporte técnico y actualizaciones, lo cual excluye su uso en contextos educativos con presupuestos limitados. Su arquitectura de caja negra, donde los mecanismos internos de diferenciación de QoS y orquestación no son inspeccionables, limita significativamente su valor pedagógico. 
-Adicionalmente, están diseñadas para interoperar con equipamiento propietario del mismo fabricante, dificultando su uso con componentes \textit{open-source} o \textit{multi-vendor}, y frecuentemente incluyen restricciones de licenciamiento que excluyen propósitos educativos o de investigación no comercial.
+El desafío, entonces, no consiste solamente en traducir una intención de seguridad a una regla. Antes de instalarla se debe determinar si, para una petición y un PEP concretos, los discriminadores requeridos ya existen, son visibles, tienen una procedencia confiable y pueden representarse y accionarse. Esta propiedad se denomina \textit{enforceability} relativa al PEP, o realizabilidad en esta tesis.
 
-\subsubsection*{Brecha de Complejidad Operacional}
+La Tabla~\ref{tab:dimensiones-problema-cap1} resume las dimensiones que pueden cambiar el resultado de una misma política.
 
-Una alternativa aparentemente viable son las plataformas de orquestación \textit{open-source} de grado operador, que si bien son técnicamente accesibles sin costos de licenciamiento, presentan una complejidad arquitectónica que excede las capacidades operacionales de entornos académicos típicos. Estudios recientes han documentado sistemáticamente esta complejidad \cite{Yilma2020, Trakadas2020}.
+\begin{table}[H]
+    \centering
+    \caption{Dimensiones que condicionan la realizabilidad de una política selectiva}
+    \label{tab:dimensiones-problema-cap1}
+    \small
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}
+        >{\raggedright\arraybackslash}p{3.25cm}
+        >{\raggedright\arraybackslash}p{4.15cm}
+        >{\raggedright\arraybackslash}X@{}}
+        \toprule
+        Dimensión & Pregunta de análisis & Efecto posible \\
+        \midrule
+        Estado de la petición & ¿La instancia fue descubierta, seleccionada o vinculada a un recurso? & El discriminador puede no haberse materializado todavía \\
+        Ubicación y capa del PEP & ¿El control opera antes o después del SCP, en L3/L4 o en L7? & Cambian los atributos visibles en el punto de decisión \\
+        Procedencia y confianza & ¿Quién generó el atributo y puede el actor comprometido alterarlo? & Un dato visible puede no servir como identidad segura \\
+        Lenguaje y acción & ¿El mecanismo representa el predicado y puede aplicarlo preventivamente? & La observación puede ser insuficiente para ejecutar la contención \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia.}
+    \end{singlespace}
+\end{table}
 
-ONAP (\textit{Open Network Automation Platform}) representa el caso extremo de complejidad: está compuesto por 20 módulos funcionales implementados como múltiples microservicios interdependientes, requiere infraestructura de OpenStack, y su despliegue inicial toma varios días incluso para usuarios experimentados \cite{Yilma2020}. Por otro lado, OSM (\textit{Open Source MANO}), aunque considerado más ligero, mantiene una complejidad significativa derivada de su adopción del \textit{framework} ETSI NFV MANO, con múltiples capas de abstracción (VIM, VNFM, NFVO) y la necesidad de dominar descriptores complejos en formato YAML/TOSCA \cite{Trakadas2020,Yilma2020}.
+La pregunta principal de investigación es la siguiente:
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.9\textwidth]{/chapter1/trakadas2020-fig1.png}
-	\caption[Arquitectura ETSI NFV MANO]{Arquitectura ETSI NFV MANO}
-	\label{fig:etsi-mano-arch}
-	
-	\vspace{0.3cm}
-	\small Fuente: Tomado de Trakadas et al. \cite{Trakadas2020}
-\end{figure}
+\begin{quote}
+\textit{¿En qué perfiles de ejecución puede un único PEP aplicar de forma preventiva y segura un intent de contención selectiva en 5G Core SBA, y qué causa explica los casos en los que no puede hacerlo?}
+\end{quote}
 
-La Figura \ref{fig:etsi-mano-arch} ilustra la separación de responsabilidades en el marco ETSI NFV MANO. Si bien esta arquitectura es robusta para entornos de producción heterogéneos, impone una carga cognitiva y operacional considerable que desvía el foco del aprendizaje de los conceptos fundamentales de 5G hacia la administración de la propia plataforma de orquestación. Esta orientación a entornos de producción introduce requisitos operacionales que dificultan su adopción en laboratorios académicos con recursos limitados.
+Se plantea como hipótesis que un \textit{intent} selectivo es realizable respecto de un PEP sólo cuando se cumplen cuatro condiciones: el discriminador requerido se ha materializado en el estado actual de la petición; el PEP puede observarlo; su procedencia es confiable frente al modelo de amenaza; y el mecanismo puede expresar el predicado y ejecutar la acción preventiva. Si falla alguna de estas condiciones, cambiar únicamente el texto de la política no recupera la capacidad de decisión.
 
-Estas barreras de complejidad, sumadas a las restricciones económicas previamente descritas, configuran un escenario que demanda soluciones alternativas diseñadas específicamente para contextos educativos.
+\subsection{Visión de la solución y efectos esperados}
+\label{subsec:vision-solucion-cap1}
 
-\subsubsection*{Necesidad de Soluciones Educativas}
+\subsubsection*{Enfoque técnico}
 
-Las brechas de accesibilidad económica y complejidad operacional descritas en las secciones anteriores limitan la experimentación práctica con \textit{network slicing} 5G en entornos educativos. La Tabla \ref{tab:comparacion-soluciones-existentes} sintetiza las características de las soluciones comerciales y \textit{open-source} de grado operador, evidenciando su inadecuación para contextos académicos con recursos limitados.
+La solución propuesta es un modelo de realizabilidad de políticas selectivas y el procedimiento de evaluación que se deriva de él. Para cada perfil de ejecución, el modelo relaciona la arquitectura de comunicación, el estado de descubrimiento, selección o \textit{binding}, la ubicación y capa del PEP, los observables confiables y las capacidades del mecanismo. Con esta información produce un veredicto y, cuando la política no es realizable, distingue tres causas: información todavía no materializada; información materializada pero no observable de manera confiable; o información confiable que el mecanismo no puede expresar o accionar.
 
-{\footnotesize
-	\renewcommand{\arraystretch}{0.95}
-	\begin{spacing}{1.55}
-		
-		\begin{table}[H]
-			\centering
-			\caption{Comparación de soluciones existentes de \textit{network slicing} 5G}
-			\label{tab:comparacion-soluciones-existentes}
-			
-			\renewcommand{\arraystretch}{1.2}
-			\setlength{\tabcolsep}{6pt}
-			
-			\begin{tabularx}{\textwidth}{|p{4.5cm}|p{4.5cm}|X|}
-				\hline
-				
-%				\rowcolor{lightgray}
-				\textbf{Característica} 
-				& \textbf{Soluciones comerciales} 
-				& \textbf{Plataformas open-source (ONAP/OSM)} \\
-				\hline
-				
-				Costo inicial 
-				& Alto (licencias, soporte técnico) 
-				& Gratuito (código abierto) \\
-				\hline
-				
-				Hardware requerido 
-				& Propietario / grado operador 
-				& 2--88 vCPUs (OSM--ONAP) \\
-				\hline
-				
-				RAM requerida 
-				& Propietario / grado operador 
-				& 8--176 GB (OSM--ONAP) \\
-				\hline
-				
-				Complejidad de despliegue 
-				& Muy alta (días/semanas) 
-				& Media--Alta (horas--días) \\
-				\hline
-				
-				Transparencia técnica 
-				& Caja negra (propietario) 
-				& Alta (código abierto) pero complejidad arquitectónica elevada \\
-				\hline
-				
-				Propósito de diseño 
-				& Redes de producción comercial 
-				& Operadores con equipos especializados \\
-				\hline
-				
-				Curva de aprendizaje 
-				& Muy alta (requiere capacitación del fabricante) 
-				& Alta (requiere conocimiento profundo de NFV MANO) \\
-				\hline
-				
-				Idoneidad para educación 
-				& Baja (costo, opacidad) 
-				& Media (complejidad operacional) \\
-				\hline
-				
-			\end{tabularx}
-			
-			\vspace{0.2cm}
-			{\small \textit{Fuente: Elaboración propia. Datos cuantitativos de ONAP y OSM basados en \cite{Yilma2020}. Características de soluciones comerciales basadas en \cite{Nokia2025,Ericsson2025}.}}
-		\end{table}
-		
-	\end{spacing}
-}
+La validación se realiza en un entorno controlado con Open5GS, K3s, Cilium y UERANSIM. La plataforma permite contrastar comunicación directa e indirecta mediante SCP, comparar PEP ubicados en distintos puntos del trayecto y observar peticiones iniciales y posteriores asociadas a un recurso. El diseño conserva constantes el \textit{intent}, el lenguaje y la política en las comparaciones causales, de modo que el cambio de resultado pueda atribuirse a la dimensión evaluada.
 
+El modelo se limita a decisiones preventivas tomadas por un solo PEP al recibir la petición. No pretende sustituir los mecanismos de autorización definidos por 3GPP, reparar una función comprometida ni garantizar que una petición permitida llegue correctamente al productor. Esta última distinción separa la capacidad de aplicar la política de los fallos de disponibilidad, ruta o ejecución que pueden aparecer después de la decisión.
 
-La democratización de la experimentación en redes 5G es una necesidad creciente documentada en la literatura reciente. La revisión sistemática de Esmaeily y Kralevska señala que, tradicionalmente, solo los operadores de red y los grandes fabricantes tenían acceso a la experimentación práctica debido a los sistemas propietarios y las restricciones de licenciamiento. Por ello, existe una necesidad documentada de bancos de pruebas de bajo costo y pequeña escala que sean apropiados para los entornos de investigación universitarios \cite{Esmaeily2021}.
+\subsubsection*{Efecto técnico}
 
-Mamushiane et al. refuerzan este punto al notar que las barreras de costo y complejidad para desplegar redes 5G Standalone (SA) afectan particularmente a regiones e instituciones con menos recursos, limitando el acceso a una educación práctica en tecnologías avanzadas \cite{Mamushiane2023}. La investigación sobre la efectividad de los laboratorios en la educación de ingeniería ha demostrado que la integración de laboratorios físicos tradicionales puede verse obstaculizada por factores como los costos de equipamiento, las restricciones de tiempo y los requisitos de infraestructura \cite{Li2024}.
+El resultado principal es un criterio reproducible para decidir, antes de desplegar una política, si el PEP elegido dispone de las condiciones necesarias para aplicarla. Esta caracterización evita atribuir a un mecanismo capacidades que pertenecen a otro punto del trayecto y permite explicar por qué dos peticiones de una misma arquitectura pueden recibir veredictos distintos cuando cambia su estado de selección o \textit{binding}.
 
-Existe, por tanto, una brecha evidente entre el contenido teórico de los cursos de redes móviles y la capacidad de los estudiantes para obtener experiencia práctica. Esta limitación en la formación de nuevos profesionales se debe tanto a las barreras de acceso a equipos reales \cite{Mamushiane2023} como a la falta de herramientas que permitan una interacción remota y realista, un pilar del nuevo paradigma de ``Educación 4.0'' \cite{Kizilkaya2021}. 
+El enfoque también aporta una forma ordenada de comparar controles L3/L4 y L7. La comparación no parte de que una capa sea siempre superior a otra, sino de los discriminadores exigidos por el \textit{intent}, su procedencia y la acción disponible. Así, una mayor visibilidad semántica sólo mejora la decisión cuando el atributo observado es pertinente y confiable.
 
-Frente a este panorama, se identifica la oportunidad de desarrollar una plataforma que equilibre tres aspectos críticos: realismo técnico suficiente para implementar los mecanismos fundamentales de \textit{network slicing} de manera funcionalmente equivalente a sistemas de producción; simplicidad operacional que permita que el foco esté en los conceptos de 5G y no en la administración de infraestructura compleja; y transparencia de mecanismos, exponiendo directamente las primitivas técnicas que materializan la diferenciación de \textit{slices} en lugar de ocultarlas tras capas de abstracción. La siguiente sección presenta la visión técnica de esta solución y sus impactos esperados.
+\subsubsection*{Efecto académico y formativo}
 
+El aporte principal es el modelo de realizabilidad y el procedimiento de evaluación que lo hace aplicable. Su valor formativo surge de la documentación del entorno, los perfiles, las predicciones y los resultados experimentales. Este material permite estudiar de manera práctica cómo interactúan la arquitectura SBA, el descubrimiento de servicios, la intermediación mediante SCP, la microsegmentación y la confianza de los observables. También ofrece una base reproducible para investigaciones posteriores sobre otros PEP, mecanismos de autorización o extensiones con estado.
 
-\subsection{Visión de la Solución y sus Impactos}
+\section{Objetivos de la tesis}
+\label{sec:objetivos-cap1}
 
-\subsubsection*{Enfoque Técnico}
+\subsection{Objetivo general}
 
-La plataforma se fundamentará en la integración de componentes \textit{open-source} de 5G (como Open5GS para el \textit{core} 5G \textit{standalone} y UERANSIM como simulador de RAN y UE) con tecnologías estándar de orquestación \textit{cloud-native} (como Kubernetes). A diferencia de las plataformas de grado operador, que priorizan una exhaustiva completitud funcional y el soporte \textit{multi-vendor}, esta solución se enfocará deliberadamente en los mecanismos esenciales del \textit{network slicing}. El diseño primará la simplicidad operacional y la visibilidad de los mecanismos, exponiendo directamente las primitivas técnicas que materializan la diferenciación entre \textit{slices}, en lugar de ocultarlas tras complejas capas de abstracción.
+Desarrollar y validar experimentalmente un modelo de realizabilidad relativa al PEP de \textit{intents} de contención selectiva en 5G Core SBA, en función del estado de selección y \textit{binding}, la ubicación del PEP, la observabilidad confiable y las capacidades del mecanismo, dentro de un alcance de un solo PEP, decisión al recibir la petición y aplicación preventiva.
 
-\subsubsection*{Impactos Técnicos Esperados}
+\subsection{Objetivos específicos}
 
-La validación técnica del proyecto incluirá experimentos para demostrar el aislamiento de rendimiento entre \textit{slices} concurrentes que emulen distintos tipos de servicio (e.g., eMBB y URLLC). Se cuantificará la efectividad de los mecanismos de diferenciación mediante métricas observables como el \textit{throughput}, la latencia y la utilización de recursos. El objetivo es demostrar que es posible lograr una diferenciación funcional entre \textit{slices} utilizando únicamente mecanismos nativos de Kubernetes y su ecosistema, sin incurrir en la complejidad arquitectónica de las plataformas de grado operador. 
+\begin{enumerate}
+    \item Formalizar un perfil de ejecución que relacione la arquitectura, el estado de la petición, el PEP, los observables confiables y las capacidades del mecanismo, y definir las causas que impiden aplicar una política selectiva.
 
-\subsubsection*{Impactos Educativos y Sociales}
+    \item Derivar perfiles de comunicación directa e indirecta a partir del ciclo de vida de las peticiones, sin asumir que un modelo arquitectónico determina por sí solo el estado de selección o \textit{binding}.
 
-El impacto educativo primario es habilitar la experimentación práctica con \textit{network slicing} en instituciones que actualmente carecen de acceso a esta tecnología. Los estudiantes podrán realizar laboratorios donde observen y midan directamente el comportamiento de \textit{slices} concurrentes, examinen las configuraciones de Kubernetes que materializan las políticas de QoS y experimenten con el ciclo de vida de las \textit{slices} en un entorno seguro.
+    \item Diseñar un verificador que evalúe, en orden, la materialización, la visibilidad, la confianza y la capacidad de acción de los discriminadores requeridos por cada \textit{intent}.
 
+    \item Implementar un entorno experimental con Open5GS, K3s, Cilium, UERANSIM y un SCP, con PEP L3/L4 y L7 ubicados antes y después del intermediario.
 
-Esta transparencia de mecanismos fomenta un aprendizaje más profundo que el ofrecido por soluciones de con opacidad técnica, contribuyendo a cerrar la brecha entre el contenido teórico de los cursos de redes móviles y la experiencia práctica. Esto es fundamental para la formación de profesionales mejor preparados para los desafíos de la industria de telecomunicaciones.
+    \item Contrastar predicciones previamente definidas mediante controles y pruebas de mutación, incluida la evaluación del efecto causal del \textit{binding} y de la confianza de los discriminadores L7 frente a una función consumidora comprometida.
 
-El impacto social más amplio reside en la democratización del acceso a la educación tecnológica avanzada. Al hacer la experimentación con 5G más accesible, utilizando componentes \textit{open-source} y con requisitos de hardware moderados, la plataforma puede contribuir a reducir la brecha digital entre instituciones con diferentes niveles de recursos. Este enfoque es particularmente relevante en contextos donde el acceso a tecnologías de punta es limitado, como se ha documentado en regiones como África, donde el alto costo de la infraestructura ha ralentizado la adopción de 5G SA.
+    \item Analizar los resultados, separar la realizabilidad de los fallos posteriores de ejecución y establecer los límites de validez y las extensiones que quedan fuera de la contribución central.
+\end{enumerate}
 
-%\subsubsection*{Replicabilidad y Sostenibilidad}
-%
-%La solución completa será documentada y empaquetada para facilitar su adopción por otras instituciones educativas. Al basarse completamente en componentes \textit{open-source} sin costos de licenciamiento y con requisitos de hardware accesibles, se espera que la plataforma sea sostenible a largo plazo sin dependencia de presupuestos extraordinarios o infraestructura especializada. La naturaleza modular del diseño permitirá futuras extensiones por parte de investigadores que deseen experimentar con algoritmos de orquestación alternativos, nuevos tipos de \textit{slice}, o integración con componentes adicionales.
+Cada objetivo tiene un resultado que puede revisarse de forma independiente. La Tabla~\ref{tab:trazabilidad-objetivos-cap1} vincula ambos; así, la evaluación no depende únicamente de que el banco de pruebas funcione.
 
-\section{Objetivos de la Tesis}
+\begin{table}[H]
+    \centering
+    \caption{Correspondencia entre objetivos y resultados verificables}
+    \label{tab:trazabilidad-objetivos-cap1}
+    \footnotesize
+    \begin{singlespace}
+    \begin{tabularx}{\textwidth}{@{}
+        >{\centering\arraybackslash}p{1.40cm}
+        >{\raggedright\arraybackslash}p{4.90cm}
+        >{\raggedright\arraybackslash}X@{}}
+        \toprule
+        Objetivo & Resultado verificable & Forma de comprobación \\
+        \midrule
+        OE1 & Perfil formal y causas de no realizabilidad & Revisión de consistencia y aplicación a casos definidos \\
+        OE2 & Matriz de perfiles directos e indirectos & Registro de precondiciones, selección y \textit{binding} por petición \\
+        OE3 & Verificador diagnóstico & Casos de prueba con veredicto y causa esperados \\
+        OE4 & Banco de pruebas instrumentado & Configuraciones, trazas y comprobación de que cada PEP está en el trayecto \\
+        OE5 & Matriz de predicciones y resultados & Controles, mutaciones y comparaciones causales \\
+        OE6 & Síntesis de hallazgos y límites & Correspondencia entre predicción, observación, fallo y alcance del resultado \\
+        \bottomrule
+    \end{tabularx}
+    \notafuente{Elaboración propia.}
+    \end{singlespace}
+\end{table}
 
-\subsection{Objetivo General}
+\section{Alcance y limitaciones}
+\label{sec:alcance-limitaciones-cap1}
 
-Diseñar e implementar una plataforma de orquestación de \textit{network slicing} 5G basada en componentes \textit{open-source}, que facilite la experimentación educativa con mecanismos de diferenciación de calidad de servicio.
+\subsection{Alcance}
 
-\subsection{Objetivos Específicos}
+La tesis estudia \textit{intents} de contención selectiva aplicados a comunicaciones del plano de control de un 5G Core SBA. El análisis comprende comunicación directa e indirecta mediante SCP, estados en los que una instancia todavía no ha sido seleccionada, ya fue seleccionada o quedó vinculada a un recurso, y PEP situados antes y después del intermediario. Se consideran controles L3/L4 y L7, así como la procedencia de los atributos usados para tomar la decisión.
 
-\textbf{Diseñar e implementar la plataforma de orquestación}
+La unidad de análisis es el perfil de ejecución de una petición concreta. Las letras asociadas con los modelos de comunicación de 3GPP se utilizan como contexto arquitectónico, pero no sustituyen el estado observado de selección o \textit{binding}. Esta decisión permite comparar peticiones iniciales y posteriores dentro de una misma arquitectura.
 
-Diseñar la arquitectura de integración entre Open5GS y Kubernetes, e implementar un módulo orquestador que permita crear y eliminar \textit{slices} de red mediante la generación automática de configuraciones de Kubernetes.
+La evaluación se concentra en un único PEP que decide al recibir la petición actual y actúa antes de que la operación alcance al productor. El resultado distingue entre realizabilidad funcional y segura. La primera indica que el PEP puede diferenciar peticiones cuando los metadatos son honestos; la segunda exige que el discriminador mantenga una procedencia confiable frente al actor comprometido definido en el modelo de amenaza.
 
-\textbf{Implementar mecanismos de diferenciación de calidad de servicio}
-
-Configurar mecanismos para diferenciar \textit{slices} de tipo eMBB y URLLC mediante control de recursos computacionales, gestión de ancho de banda, y aislamiento lógico, e implementar una interfaz web para gestionar \textit{slices}.
-
-\textbf{Validar experimentalmente la diferenciación entre \textit{slices}}
-
-Ejecutar experimentos que midan \textit{throughput}, latencia y utilización de recursos en \textit{slices} concurrentes, documentando los niveles de diferenciación de QoS logrados.
-
-\section{Alcances y Limitaciones}
-
-\subsection{Alcances}
-
-La tesis presenta una plataforma de orquestación de \textit{network slicing} 5G con funcionalidades orientadas a la experimentación educativa. La plataforma permite gestionar el ciclo de vida de los \textit{network slices} a través de una interfaz web, incluyendo operaciones de creación, configuración, monitoreo básico y eliminación. La diferenciación de calidad de servicio se implementa a nivel del \textit{5G Core}, específicamente en la función de plano de usuario (\textit{User Plane Function}), soportando dos tipos de \textit{slice}: eMBB y URLLC.
-
-La validación del sistema incluye experimentos para la medición de \textit{throughput}, latencia y utilización de recursos en \textit{slices} concurrentes.
-
-El resultado obtenido es una plataforma funcional que permite la gestión y experimentación de \textit{network slices} 5G, junto con la documentación de los experimentos de validación y las métricas cuantitativas. La orquestación de los componentes se realiza sobre un entorno \textit{Kubernetes}, lo que permite una gestión modular y escalable de los servicios involucrados.
+El entorno principal emplea Open5GS 2.8.0 y componentes \textit{cloud-native} desplegados en un laboratorio controlado. Los resultados y artefactos comprenden el formalismo de análisis, el verificador diagnóstico, la instrumentación del banco de pruebas, las matrices de predicción y resultado, y la evidencia necesaria para reproducir los perfiles evaluados.
 
 \subsection{Limitaciones}
 
-La diferenciación de \textit{slicing} se limita exclusivamente al \textit{5G Core}. Todos los \textit{slices} comparten la misma RAN simulada, sin aplicación de \textit{slicing} a nivel del \textit{gNodeB}. Se emplea un entorno de simulación de RAN y UE, sin integración con equipamiento de radiofrecuencia real ni con hardware \textit{Software-Defined Radio} (SDR).
+Los resultados corresponden a los perfiles y versiones evaluados. Se utiliza una implementación principal de 5G Core, por lo que no se reclama generalización automática a todas las implementaciones comerciales o de código abierto. Los casos construidos buscan aislar relaciones causales, no producir inferencia estadística sobre redes 5G en operación.
 
-La plataforma opera dentro de un único dominio administrativo, sin interfaces de federación \textit{multi-operador} ni soporte para \textit{slice roaming}. El dimensionamiento de recursos es manual, sin implementación de mecanismos automáticos de \textit{auto-scaling}. El sistema se despliega sobre un único clúster de \textit{Kubernetes}, sin soporte \textit{multi-VIM} ni despliegues distribuidos.
+La contribución central no incluye cooperación entre varios PEP, reconstrucción histórica obligatoria, aplicación reactiva, reparación de funciones de red ni tolerancia a un host, núcleo del sistema o plano de control comprometidos. Tampoco evalúa rendimiento, disponibilidad, \textit{throughput}, movilidad, \textit{roaming}, carga masiva, \textit{handover} o corrección completa del 5G Core.
 
-Los componentes del \textit{Core} 5G se implementan en configuración básica, sin redundancia ni alta disponibilidad. La autenticación es simplificada, sin soporte de \textit{multi-tenancy} completo. Los experimentos se ejecutaron en entornos controlados de laboratorio, sin contemplar pruebas de carga masiva ni escenarios de operación a gran escala.
+Los perfiles relacionados con el modelo de comunicación D se inducen de forma controlada porque el entorno no proporcionó un caso nativo externo que permitiera aislar las variables. En consecuencia, la tesis valida el mecanismo observado en esos perfiles, no una propiedad universal del modelo D. Del mismo modo, la tercera causa diagnóstica, referida a información confiable pero no expresable o accionable, se sustenta en las capacidades documentadas del mecanismo y no en un caso de ejecución aislado con la misma fuerza que las dos primeras causas.
 
-Estas limitaciones permitieron enfocar el desarrollo en la correcta implementación de los mecanismos fundamentales de \textit{network slicing} en el \textit{5G Core} y en la demostración de la diferenciación de calidad de servicio (\textit{QoS}) mediante experimentación.
-\section{Beneficiarios de la Solución}
+Una petición permitida puede fallar después por indisponibilidad del productor o por un problema de ruta. Ese resultado se registra como fallo de realización en ejecución y no cambia retroactivamente el veredicto sobre la capacidad del PEP para aplicar la política.
 
-\subsection{Beneficiarios Directos}
+\section{Beneficiarios}
+\label{sec:beneficiarios-cap1}
 
-Los beneficiarios directos incluyen estudiantes de ingeniería de telecomunicaciones en pregrado y posgrado que cursen asignaturas relacionadas con redes móviles o tecnologías 5G, quienes podrán realizar prácticas de laboratorio sobre \textit{network slicing} y observar mecanismos de diferenciación de QoS. Los docentes de cursos de redes móviles o arquitecturas 5G podrán incorporar la plataforma en actividades prácticas de laboratorio, complementando contenido teórico con experimentación directa. Investigadores en etapas iniciales, particularmente estudiantes de posgrado, podrán utilizar la plataforma como \textit{testbed} funcional para ejecutar experimentos o validar propuestas sin necesidad de construir la infraestructura completa desde cero.
+\subsection{Beneficiarios directos}
 
-\subsection{Beneficiarios Indirectos}
+Los beneficiarios directos son investigadores, estudiantes y profesionales que diseñan o evalúan controles de seguridad para el 5G Core. El modelo les permite identificar qué información necesita una política, dónde se encuentra y qué confianza puede atribuirse a ella antes de escoger la ubicación o la tecnología del PEP. La documentación del banco de pruebas también reduce el trabajo inicial necesario para reproducir perfiles de comunicación SBA y comprobar políticas selectivas.
 
-Las instituciones educativas, especialmente universidades e institutos técnicos con presupuestos limitados, podrán ofrecer prácticas de laboratorio en tecnologías 5G sin requerir inversiones en equipamiento comercial o licencias propietarias. La comunidad académica más amplia se beneficiará al poder utilizar, adaptar o extender la plataforma dado que estará documentada y empaquetada como código abierto. El sector de telecomunicaciones se beneficia potencialmente de profesionales con experiencia práctica en \textit{network slicing}, aunque el impacto de una única plataforma educativa en el mercado laboral es limitado y difícil de cuantificar.
+Los equipos responsables de seguridad y arquitectura de redes móviles pueden utilizar la matriz de evaluación como apoyo para revisar políticas antes de su despliegue. El resultado no sustituye una evaluación completa de producción, pero ayuda a detectar reglas que parecen válidas en el lenguaje y que no pueden aplicarse con los observables disponibles en el punto elegido.
 
-\section{Consideraciones No Técnicas}
+\subsection{Beneficiarios indirectos}
 
-Si bien el núcleo de este trabajo es técnico, su naturaleza educativa y su potencial impacto en la democratización del acceso a tecnologías 5G requieren considerar dimensiones adicionales que enmarcan el desarrollo responsable y socialmente consciente de la plataforma.
+Las organizaciones que operan servicios sobre redes 5G podrían beneficiarse de controles internos mejor justificados y de una delimitación más clara de sus supuestos. Los usuarios finales también podrían verse favorecidos por una menor exposición a movimientos laterales o accesos excesivos dentro del núcleo. Estos efectos son potenciales: la tesis evalúa la capacidad de aplicar políticas en un laboratorio y no mide directamente reducción de incidentes en redes comerciales.
 
-\subsection{Aspectos Legales y Regulatorios}
+La comunidad académica dispone de un caso de estudio que conecta especificaciones 3GPP, mecanismos \textit{cloud-native} y validación experimental. Sus artefactos pueden servir como punto de partida para trabajos sobre múltiples PEP, memoria de \textit{binding}, otras funciones productoras o mecanismos de confianza distintos.
 
-La plataforma se basa en componentes \textit{open-source} con licencias que permiten uso educativo: Open5GS bajo licencia AGPLv3, UERANSIM bajo GPLv3, y Kubernetes y Cilium bajo licencia Apache 2.0. No existen restricciones legales para su uso en laboratorios académicos. Al utilizar simulación sin emisión de radiofrecuencia real, no se requieren permisos de uso de espectro radioeléctrico por parte de autoridades regulatorias.
+\section{Consideraciones no técnicas}
+\label{sec:consideraciones-cap1}
 
-\subsection{Aspectos Éticos}
+\subsection{Aspectos legales y regulatorios}
 
-El proyecto reduce barreras económicas para acceso a experimentación práctica en tecnologías 5G. La transparencia de componentes \textit{open-source} permite inspección de mecanismos técnicos, facilitando aprendizaje más profundo que soluciones propietarias en donde existe opacidad técnica. La plataforma debe utilizarse exclusivamente en entornos controlados de laboratorio para propósitos educativos.
+El banco de pruebas utiliza datos y entidades simulados, sin tráfico de abonados reales ni emisión de radiofrecuencia. Si el procedimiento se trasladara a una red operativa, las trazas y cabeceras podrían contener identificadores, direcciones u otros datos vinculables con personas. Su tratamiento debería ajustarse a la Ley N.\textsuperscript{o} 29733, Ley de Protección de Datos Personales, y a su reglamento vigente~\cite{PeruLey29733,PeruDS0162024JUS}. Esto implica limitar la recopilación a los datos necesarios, controlar el acceso, definir periodos de conservación y anonimizar los artefactos antes de compartirlos.
 
-\subsection{Aspectos Sociales}
+La implementación también debe respetar las licencias de los componentes de código abierto y conservar sus avisos y condiciones de redistribución. La tesis documenta configuraciones y resultados experimentales, pero no incorpora credenciales, claves privadas ni información operativa de terceros.
 
-La plataforma puede contribuir a reducir disparidades en acceso a educación práctica de tecnologías avanzadas entre instituciones con diferentes niveles de recursos. Esto es particularmente relevante en contextos donde infraestructura de telecomunicaciones de última generación es limitada o inaccesible para propósitos educativos.
+\subsection{Aspectos éticos y de seguridad}
 
-%\subsection{Aspectos Económicos}
-%
-%El costo principal corresponde a hardware de servidor, estimado entre \$2,000 y \$5,000 USD para una configuración adecuada, significativamente menor que licencias de soluciones comerciales. El software es gratuito al ser \textit{open-source}. Los costos operacionales se limitan a consumo eléctrico y mantenimiento básico del sistema.
+Los experimentos parten de una función de red comprometida capaz de emitir peticiones y modificar metadatos no protegidos. Este supuesto se utiliza para evaluar la confianza de los discriminadores, no para acceder a infraestructura ajena. Todas las pruebas se ejecutan en un entorno autorizado, aislado y controlado.
 
-\subsection{Aspectos Ambientales}
+La comunicación de resultados debe evitar dos interpretaciones incorrectas. La primera es presentar un atributo autoafirmado como prueba de identidad; la segunda es describir un resultado de laboratorio como garantía universal. Por ello, cada conclusión conserva sus precondiciones, distingue entre discriminación funcional y segura, y declara los perfiles que no pudieron validarse de forma nativa.
 
-El uso de virtualización y contenedores permite consolidación de servicios en menos hardware físico, resultando en menor consumo energético que mantener múltiples servidores físicos dedicados. La plataforma puede ejecutarse en hardware de servidor estándar existente, permitiendo reutilización de equipamiento disponible en laboratorios.
+\subsection{Aspectos sociales}
 
-\subsection{Bien Común}
+La seguridad del núcleo móvil influye en servicios que dependen de la conectividad, pero esta tesis no cuantifica un impacto social directo. Su contribución se sitúa en la mejora del proceso de evaluación: explicitar los supuestos de una política selectiva ayuda a evitar que las decisiones de seguridad se basen sólo en la sintaxis de la regla o en una visión incompleta del trayecto.
 
-La publicación de la implementación contribuye al conocimiento público sobre implementaciones prácticas de \textit{network slicing} 5G. Esto beneficia a la comunidad académica al proporcionar un caso de estudio y punto de partida para futuras investigaciones o adaptaciones en otros contextos educativos.
+El uso de componentes de código abierto y la conservación de evidencia reproducible facilitan que universidades y laboratorios con recursos limitados estudien estos mecanismos. La utilidad educativa depende, sin embargo, de acompañar los artefactos con instrucciones claras y de no confundir un entorno experimental con una red preparada para producción.
 
-\section{Motivación Personal}
+\subsection{Aspectos económicos y de sostenibilidad}
 
-El interés en esta investigación surge de la convergencia entre motivaciones técnicas y formativas. Durante la formación académica del autor, los cursos de redes móviles generaron entusiasmo por las nuevas capacidades ofrecidas por 5G con respecto a 4G, particularmente el network slicing como mecanismo de diferenciación de servicios. 
+La propuesta aprovecha infraestructura y software disponibles en el laboratorio, por lo que no exige licencias propietarias para ejecutar la validación. Este enfoque reduce el costo de entrada para reproducir el estudio, aunque no elimina el tiempo de configuración, mantenimiento y revisión de versiones.
 
-Adicionalmente, el trabajo permite profundizar en áreas técnicas de gran interés personal como la orquestación de contenedores con Kubernetes, implementaciones cloud-native de funciones de red, y la intersección entre virtualización de redes y diferenciación de calidad de servicio. La naturaleza integradora de la tesis, que requiere combinar conceptos de redes móviles, sistemas distribuidos y desarrollo de software, constituye un desafío técnico formativo fundamental para el desarrollo profesional.
+Desde el punto de vista ambiental, el banco de pruebas utiliza recursos computacionales acotados y evita equipamiento radioeléctrico adicional. La repetición de experimentos se limita a los controles necesarios y los artefactos se conservan para no ejecutar nuevamente pruebas cuya evidencia ya es suficiente. Estas medidas no constituyen una evaluación formal de huella ambiental, pero orientan un uso responsable de la infraestructura.
 
-\section{Reflexión Final del Capítulo}
+\subsection{Contribución al bien común}
 
-Este capítulo ha caracterizado el desafío de ingeniería que motiva el presente trabajo: la brecha entre la relevancia pedagógica del \textit{network slicing} 5G y las barreras de accesibilidad que limitan su experimentación práctica en entornos académicos. Se han identificado dos brechas fundamentales: la inaccesibilidad económica y opacidad técnica de soluciones comerciales, y la complejidad operacional desfavorable de plataformas \textit{open-source} de grado operador.
+La contribución al bien común se relaciona con una infraestructura de comunicaciones más comprensible y verificable. Hacer explícitas las condiciones bajo las cuales una política puede aplicarse favorece decisiones técnicas auditables y reduce la dependencia de afirmaciones no comprobadas. La publicación ordenada del modelo y de la evidencia también facilita la revisión por terceros y la formación de profesionales capaces de evaluar críticamente los controles de seguridad.
 
-El análisis presentado fundamenta la necesidad de desarrollar una plataforma que equilibre realismo técnico, simplicidad operacional y transparencia de mecanismos. Los objetivos y alcances definidos delimitan un proyecto técnicamente viable que prioriza la implementación correcta de mecanismos fundamentales sobre la replicación exhaustiva de funcionalidades empresariales.
+\section{Motivación personal}
+\label{sec:motivacion-cap1}
 
-Con el problema caracterizado y la visión de solución establecida, el siguiente capítulo abordará el estado del arte y los fundamentos teóricos que soportarán el diseño técnico de la plataforma.
+Mi interés por esta investigación nació del estudio de las redes móviles y de los cambios introducidos por 5G respecto de generaciones anteriores. La arquitectura basada en servicios me resultó especialmente atractiva porque reúne problemas de telecomunicaciones, sistemas distribuidos, seguridad y tecnologías \textit{cloud-native}. Al trabajar con Open5GS y Kubernetes advertí que desplegar una política no equivale necesariamente a poder hacerla cumplir con el significado esperado.
+
+Esa diferencia convirtió un problema de configuración en una pregunta de investigación: qué información observa cada control, cuándo aparece la identidad necesaria y qué ocurre si la función comprometida manipula el dato visible. Mi principal motivación fue responderla mediante un entorno reproducible que permitiera contrastar la explicación conceptual.
+
+\newpage
+
+El trabajo también me permitió integrar conocimientos adquiridos durante la carrera: arquitectura 5G, protocolos, virtualización, contenedores, observabilidad y seguridad de redes. El objetivo personal es que el resultado conserve esa conexión entre teoría y experimentación y que pueda ser revisado, repetido y ampliado por otros estudiantes.
+
+\section{Cierre del capítulo}
+\label{sec:cierre-cap1}
+
+El problema de la tesis queda definido como la falta de una caracterización situada que permita determinar si un \textit{intent} de contención selectiva es realizable desde un PEP concreto y explicar por qué deja de serlo. La pregunta y la hipótesis concentran el análisis en cuatro condiciones: materialización, visibilidad, confianza y capacidad de acción. Los objetivos y límites fijan una evaluación preventiva, al recibir la petición y mediante un solo PEP, dentro de perfiles controlados de 5G Core SBA.
+
+El capítulo siguiente desarrolla los fundamentos técnicos, explica el método de la revisión sistemática y organiza la evidencia que sustenta el modelo y el diseño experimental.

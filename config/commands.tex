@@ -1,0 +1,126 @@
+% =============================================================================
+% DATOS DE LA TESIS
+% =============================================================================
+
+\newcommand{\thesistitle}{Diseño e Implementación de un Modelo de Evaluación para la Contención Selectiva en un Núcleo de Red 5G Cloud-Native}
+\newcommand{\thesisauthor}{Denilson Ademir Quispe Ayala}
+\newcommand{\thesisadvisor}{José Vicente de Paúl Rodríguez Salazar}
+
+\title{\thesistitle}
+\author{\thesisauthor}
+\date{\limaFecha\today}
+
+\hypersetup{
+    pdftitle={\thesistitle},
+    pdfauthor={\thesisauthor}
+}
+
+% =============================================================================
+% COMANDOS DE ESTRUCTURA
+% =============================================================================
+
+% Capítulo no numerado que también aparece en el índice general.
+\newcommand{\chapterwithtoc}[1]{%
+    \chapter*{#1}
+    \phantomsection
+    \addcontentsline{toc}{chapter}{#1}%
+}
+
+% Nota de fuente uniforme para figuras y tablas.
+\newcommand{\notafuente}[1]{%
+    \caption*{Fuente: #1}%
+}
+
+% =============================================================================
+% ESTILO DE LAS FIGURAS TÉCNICAS
+% =============================================================================
+
+% Paleta única para todos los diagramas de elaboración propia.
+\definecolor{figNFborde}{HTML}{4A6D96}
+\definecolor{figNFfondo}{HTML}{EDF2F8}
+\definecolor{figNFtexto}{HTML}{1F3A5F}
+\definecolor{figInfraBorde}{HTML}{7A7A7A}
+\definecolor{figInfraFondo}{HTML}{F4F4F4}
+\definecolor{figInfraTexto}{HTML}{333333}
+\definecolor{figPEPborde}{HTML}{B58133}
+\definecolor{figPEPfondo}{HTML}{FBF3E4}
+\definecolor{figPEPtexto}{HTML}{6E4E17}
+\definecolor{figNegBorde}{HTML}{B03A2E}
+\definecolor{figNegFondo}{HTML}{FBEDEB}
+\definecolor{figNegTexto}{HTML}{7B2A21}
+\definecolor{figPosBorde}{HTML}{3B7A57}
+\definecolor{figPosFondo}{HTML}{EDF5F0}
+\definecolor{figPosTexto}{HTML}{2A5A40}
+\definecolor{figGris}{HTML}{6E6E6E}
+\definecolor{figGrisSuave}{HTML}{A8A8A8}
+\definecolor{figBanda}{HTML}{FAFAFA}
+
+\tikzset{
+    % Base común: grosor de línea, punta de flecha y tipografía.
+    figbase/.style={
+        font=\small,
+        line width=0.7pt,
+        >={Latex[length=2.1mm,width=1.5mm]},
+        every node/.append style={inner sep=3pt}
+    },
+    % Función de red.
+    fignf/.style={
+        draw=figNFborde, fill=figNFfondo, text=figNFtexto,
+        rounded corners=2pt, line width=0.8pt,
+        minimum width=2.4cm, minimum height=1cm, align=center
+    },
+    % Componente de infraestructura o intermediario.
+    figinfra/.style={
+        draw=figInfraBorde, fill=figInfraFondo, text=figInfraTexto,
+        line width=0.9pt,
+        minimum width=2.2cm, minimum height=1cm, align=center
+    },
+    % Punto de ejecución de políticas.
+    figpep/.style={
+        draw=figPEPborde, fill=figPEPfondo, text=figPEPtexto,
+        shape=chamfered rectangle, chamfered rectangle xsep=7pt,
+        line width=0.8pt,
+        minimum width=2cm, minimum height=1cm, align=center
+    },
+    % Registro de instancias.
+    fignrf/.style={
+        draw=figInfraBorde, fill=figInfraFondo, text=figInfraTexto,
+        shape=cylinder, shape border rotate=90, aspect=0.18,
+        line width=0.8pt,
+        minimum width=1cm, minimum height=1.9cm, align=center
+    },
+    % Comprobación de una cadena de decisión.
+    figgate/.style={
+        draw=figNFborde, fill=figNFfondo, text=figNFtexto,
+        rounded corners=2pt, line width=0.8pt,
+        minimum width=4.2cm, minimum height=1.05cm, align=center
+    },
+    % Resultado negativo y su causa.
+    figneg/.style={
+        draw=figNegBorde, fill=figNegFondo, text=figNegTexto,
+        rounded corners=2pt, line width=0.8pt,
+        align=left, text width=6.5cm, inner sep=6pt
+    },
+    % Veredicto positivo.
+    figpos/.style={
+        draw=figPosBorde, fill=figPosFondo, text=figPosTexto,
+        rounded corners=2pt, line width=1pt,
+        minimum width=4.2cm, minimum height=1.05cm, align=center
+    },
+    % Nota al margen del flujo principal.
+    fignota/.style={
+        draw=figGrisSuave, fill=white, text=figInfraTexto,
+        line width=0.6pt, dash pattern=on 2pt off 1.6pt,
+        align=left, inner sep=6pt, font=\footnotesize
+    },
+    % Aristas.
+    figflujo/.style={->, draw=figGris, line width=0.9pt},
+    figsi/.style={->, draw=figPosBorde, line width=1pt},
+    figno/.style={->, draw=figNegBorde, line width=0.8pt,
+                  dash pattern=on 3pt off 2pt},
+    figaux/.style={->, draw=figGrisSuave, line width=0.6pt,
+                   dash pattern=on 2pt off 1.6pt},
+    % Rótulos.
+    figrot/.style={font=\scriptsize, text=figGris, inner sep=2pt},
+    figcarril/.style={font=\small\bfseries, text=figInfraTexto, anchor=west}
+}

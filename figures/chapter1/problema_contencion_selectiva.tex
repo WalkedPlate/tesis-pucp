@@ -1,0 +1,105 @@
+\begin{tikzpicture}[
+    font=\small\setstretch{1},
+    component/.style={
+        draw=black!65,
+        rounded corners=2pt,
+        fill=blue!5,
+        minimum height=1.35cm,
+        text width=2.25cm,
+        align=center,
+        inner sep=4pt
+    },
+    pep/.style={
+        draw=orange!80!black,
+        rounded corners=2pt,
+        fill=orange!12,
+        minimum height=1.35cm,
+        text width=1.85cm,
+        align=center,
+        inner sep=4pt
+    },
+    destination/.style={
+        draw=black!60,
+        rounded corners=2pt,
+        fill=gray!7,
+        minimum height=0.72cm,
+        text width=1.80cm,
+        align=center,
+        inner sep=3pt
+    },
+    factor/.style={
+        draw=black!50,
+        rounded corners=2pt,
+        fill=gray!4,
+        minimum height=0.72cm,
+        text width=2.85cm,
+        align=center,
+        inner sep=3pt,
+        font=\footnotesize\setstretch{1}
+    },
+    flow/.style={-{Latex[length=2.2mm]}, thick, draw=black!75},
+    blocked/.style={-{Latex[length=2.2mm]}, thick, dashed, draw=red!70!black},
+    allowed/.style={-{Latex[length=2.2mm]}, thick, draw=green!40!black}
+]
+    \node[
+        draw=black!55,
+        rounded corners=2pt,
+        fill=gray!4,
+        minimum height=0.72cm,
+        text width=13.75cm,
+        align=center,
+        inner sep=4pt
+    ] (intent) {
+        \textbf{Intent de contención selectiva:}
+        bloquear \texttt{UDM\_a} y permitir \texttt{UDM\_b}
+    };
+
+    \node[component, below=0.62cm of intent.south west, anchor=north west,
+        xshift=0.18cm] (consumer) {
+        \textbf{NF consumidora}\\[-1pt]
+        \scriptsize Puede alterar metadatos no protegidos
+    };
+    \node[pep, right=0.42cm of consumer] (pep1) {
+        \textbf{PEP antes}\\[-1pt]
+        del SCP\\[-1pt]
+        \scriptsize L3/L4 o L7
+    };
+    \node[component, right=0.42cm of pep1] (scp) {
+        \textbf{SCP}\\[-1pt]
+        \scriptsize Ruta, selección o contexto de \textit{binding}
+    };
+    \node[pep, right=0.42cm of scp] (pep2) {
+        \textbf{PEP después}\\[-1pt]
+        del SCP\\[-1pt]
+        \scriptsize L3/L4 o L7
+    };
+    \node[destination, right=0.68cm of pep2, yshift=0.46cm] (udma) {
+        \texttt{UDM\_a}\\[-1pt]
+        \scriptsize\textbf{BLOQUEAR}
+    };
+    \node[destination, right=0.68cm of pep2, yshift=-0.46cm] (udmb) {
+        \texttt{UDM\_b}\\[-1pt]
+        \scriptsize\textbf{PERMITIR}
+    };
+
+    \draw[flow] (consumer) -- (pep1);
+    \draw[flow] (pep1) -- (scp);
+    \draw[flow] (scp) -- (pep2);
+    \draw[blocked] (pep2.east) -- ++(0.28,0) |- (udma.west);
+    \draw[allowed] (pep2.east) -- ++(0.28,0) |- (udmb.west);
+
+    \node[below=1.42cm of scp, font=\footnotesize\bfseries\setstretch{1}]
+        (factor-title) {El veredicto depende de cuatro factores};
+    \node[factor, below=0.18cm of factor-title, xshift=-4.80cm] (f1) {
+        1. Estado de la petición
+    };
+    \node[factor, below=0.18cm of factor-title, xshift=-1.60cm] (f2) {
+        2. Ubicación y capa del PEP
+    };
+    \node[factor, below=0.18cm of factor-title, xshift=1.60cm] (f3) {
+        3. Observables confiables
+    };
+    \node[factor, below=0.18cm of factor-title, xshift=4.80cm] (f4) {
+        4. Acción disponible
+    };
+\end{tikzpicture}

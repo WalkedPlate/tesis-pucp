@@ -1,0 +1,84 @@
+<mxfile host="app.diagrams.net" agent="Claude" type="device">
+  <diagram id="fig05" name="Verificador">
+    <mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="720" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" value="Diagrama" parent="0" />
+        <mxCell id="L2" value="Titulo" parent="0" />
+
+        <mxCell id="in" value="&lt;b&gt;Entrada&lt;/b&gt;&lt;br&gt;intent I evaluado sobre el perfil &#928;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#666666;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="250" width="170" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="g1" value="&lt;b&gt;1. Materializaci&#243;n&lt;/b&gt;&lt;br&gt;&#191;el discriminador ya existe en el estado de la petici&#243;n?" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="260" y="250" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="g2" value="&lt;b&gt;2. Visibilidad&lt;/b&gt;&lt;br&gt;&#191;el PEP puede observarlo en su ubicaci&#243;n y capa?" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="480" y="250" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="g3" value="&lt;b&gt;3. Confianza&lt;/b&gt;&lt;br&gt;&#191;su procedencia resiste el modelo de amenaza?" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="250" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="g4" value="&lt;b&gt;4. Acci&#243;n&lt;/b&gt;&lt;br&gt;&#191;el mecanismo lo expresa y lo aplica de forma preventiva?" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="920" y="250" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="R" value="&lt;b&gt;R&lt;/b&gt;&lt;br&gt;realizable" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF5F0;strokeColor=#3B7A57;fontColor=#2A5A40;fontSize=13;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="250" width="120" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="f1" value="&lt;b&gt;U &#8212; F1&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px&quot;&gt;la informaci&#243;n a&#250;n no existe en el punto de decisi&#243;n&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;fontColor=#7B2A21;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="245" y="430" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f2a" value="&lt;b&gt;U &#8212; F2&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px&quot;&gt;no visible: oculta por el cifrado o transformada por el SCP&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;fontColor=#7B2A21;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="465" y="430" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f2b" value="&lt;b&gt;U &#8212; F2&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px&quot;&gt;visible pero autoafirmada por el actor que debe discriminarse&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;fontColor=#7B2A21;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="685" y="430" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="f3" value="&lt;b&gt;U &#8212; F3&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px&quot;&gt;confiable pero no expresable ni accionable por el mecanismo&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;fontColor=#7B2A21;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="905" y="430" width="200" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="nota" value="El veredicto se refiere &#250;nicamente a la capacidad de decidir antes de que la operaci&#243;n llegue al productor. Si una petici&#243;n permitida falla despu&#233;s por indisponibilidad o por un problema de ruta, se registra como fallo de realizaci&#243;n en ejecuci&#243;n y no modifica el veredicto." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C4C4C4;fontColor=#4D4D4D;fontSize=11;fontFamily=Times New Roman;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="600" width="1210" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="in" target="g1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="s&#237;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3B7A57;fontSize=10;fontColor=#3B7A57;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom" edge="1" parent="1" source="g1" target="g2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="s&#237;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3B7A57;fontSize=10;fontColor=#3B7A57;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom" edge="1" parent="1" source="g2" target="g3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="s&#237;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3B7A57;fontSize=10;fontColor=#3B7A57;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom" edge="1" parent="1" source="g3" target="g4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="s&#237;" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#3B7A57;fontSize=10;fontColor=#3B7A57;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;verticalAlign=bottom" edge="1" parent="1" source="g4" target="R">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="n1" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B03A2E;fontSize=10;fontColor=#B03A2E;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="g1" target="f1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n2" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B03A2E;fontSize=10;fontColor=#B03A2E;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="g2" target="f2a">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n3" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B03A2E;fontSize=10;fontColor=#B03A2E;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="g3" target="f2b">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="n4" value="no" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#B03A2E;fontSize=10;fontColor=#B03A2E;fontFamily=Times New Roman;endArrow=block;endFill=1;endSize=8;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0" edge="1" parent="1" source="g4" target="f3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t1" value="El verificador: cuatro condiciones en orden" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1A1A1A;fontFamily=Times New Roman" vertex="1" parent="L2">
+          <mxGeometry x="50" y="30" width="1000" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="Cada condici&#243;n que falla identifica una causa distinta de no realizabilidad" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;fontFamily=Times New Roman" vertex="1" parent="L2">
+          <mxGeometry x="50" y="56" width="1000" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

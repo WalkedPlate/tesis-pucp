@@ -1,105 +1,96 @@
-\chapter*{GLOSARIO}
-\thispagestyle{fancy} 
-\addcontentsline{toc}{chapter}{GLOSARIO}
+\chapterwithtoc{GLOSARIO}
+\thispagestyle{fancy}
 
-\begin{longtable}{|p{0.2\textwidth}|p{0.75\textwidth}|}
-	\hline
-	\textbf{Término} & \textbf{Descripción} \\
-	\hline
-	\endfirsthead
-	
-	\hline
-	\textbf{Término} & \textbf{Descripción} \\
-	\hline
-	\endhead
-	
-	\hline
-	\endfoot
-	
-	3GPP & \textit{3rd Generation Partnership Project}. Organización de estandarización que desarrolla protocolos para telecomunicaciones móviles, incluyendo las especificaciones para redes 5G. \\
-	\hline
-	
-	5G & Quinta generación de tecnología de redes móviles celulares, sucesora de 4G/LTE. \\
-	\hline
-	
-	AMF & \textit{Access and Mobility Management Function}. Función de red del 5G Core que gestiona el acceso y movilidad de los equipos de usuario. \\
-	\hline
-	
-	API & \textit{Application Programming Interface}. Interfaz de programación de aplicaciones que permite la comunicación entre diferentes componentes de software. \\
-	\hline
-	
-	CNI & \textit{Container Network Interface}. Especificación y bibliotecas para configurar interfaces de red en contenedores Linux. \\
-	\hline
-	
-	eMBB & \textit{Enhanced Mobile Broadband}. Tipo de \textit{slice} 5G optimizado para servicios de alto ancho de banda como video 4K/8K y realidad virtual. \\
-	\hline
-	
-	gNodeB & Estación base de nueva generación en redes 5G, equivalente al eNodeB de LTE. \\
-	\hline
-	
-	IoT & \textit{Internet of Things}. Internet de las Cosas, red de dispositivos físicos conectados que intercambian datos. \\
-	\hline
-	
-	MANO & \textit{Management and Orchestration}. Marco de gestión y orquestación definido por ETSI para funciones de red virtualizadas. \\
-	\hline
-	
-	mMTC & \textit{massive Machine-Type Communications}. Tipo de \textit{slice} 5G optimizado para conectar masivamente dispositivos IoT con bajo consumo energético. \\
-	\hline
-	
-	NFV & \textit{Network Functions Virtualization}. Virtualización de funciones de red, permitiendo que servicios de red se ejecuten en software sobre hardware estándar. \\
-	\hline
-	
-	NFVO & \textit{NFV Orchestrator}. Componente del marco MANO responsable de orquestar recursos de red y servicios. \\
-	\hline
-	
-	NRF & \textit{Network Repository Function}. Función de red del 5G Core que mantiene un registro de funciones de red disponibles. \\
-	\hline
-	
-	NSD & \textit{Network Service Descriptor}. Descriptor que define la estructura y requisitos de un servicio de red en formato YAML/TOSCA. \\
-	\hline
-	
-	ONAP & \textit{Open Network Automation Platform}. Plataforma open-source de orquestación y automatización de redes de grado carrier. \\
-	\hline
-	
-	OSM & \textit{Open Source MANO}. Plataforma open-source que implementa el marco ETSI NFV MANO para orquestación de funciones de red virtualizadas. \\
-	\hline
-	
-	QoS & \textit{Quality of Service}. Calidad de Servicio, conjunto de tecnologías y mecanismos para garantizar niveles específicos de rendimiento de red. \\
-	\hline
-	
-	RAN & \textit{Radio Access Network}. Red de Acceso Radio, componente de red móvil que conecta dispositivos de usuario mediante interfaces de radio. \\
-	\hline
-	
-	SDR & \textit{Software-Defined Radio}. Radio definido por software, donde componentes tradicionalmente implementados en hardware se implementan mediante software. \\
-	\hline
-	
-	SMF & \textit{Session Management Function}. Función de red del 5G Core responsable de gestionar sesiones de datos de usuario. \\
-	\hline
-	
-	SST & \textit{Slice/Service Type}. Valor numérico que identifica el tipo de \textit{slice} de red según las categorías definidas por 3GPP (1=eMBB, 2=URLLC, 3=mMTC). \\
-	\hline
-	
-	TOSCA & \textit{Topology and Orchestration Specification for Cloud Applications}. Lenguaje estándar para describir topologías y orquestación de aplicaciones en la nube. \\
-	\hline
-	
-	UE & \textit{User Equipment}. Equipo de Usuario, terminal o dispositivo que se conecta a la red móvil. \\
-	\hline
-	
-	UPF & \textit{User Plane Function}. Función de red del 5G Core que maneja el plano de usuario, incluyendo enrutamiento y reenvío de paquetes. \\
-	\hline
-	
-	URLLC & \textit{Ultra-Reliable Low-Latency Communications}. Tipo de \textit{slice} 5G optimizado para aplicaciones críticas que requieren latencia ultrabaja y alta confiabilidad. \\
-	\hline
-	
-	VIM & \textit{Virtualized Infrastructure Manager}. Gestor de infraestructura virtualizada que controla recursos de cómputo, almacenamiento y red. \\
-	\hline
-	
-	VNFD & \textit{VNF Descriptor}. Descriptor que define las características y requisitos de una función de red virtualizada. \\
-	\hline
-	
-	VNFM & \textit{VNF Manager}. Gestor de funciones de red virtualizadas, responsable del ciclo de vida de VNFs. \\
-	\hline
-	
+\begin{singlespace}
+\small
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.75\textwidth}@{}}
+    \toprule
+    \textbf{Término} & \textbf{Descripción} \\
+    \midrule
+    \endfirsthead
+
+    \toprule
+    \textbf{Término} & \textbf{Descripción} \\
+    \midrule
+    \endhead
+
+    \endfoot
+
+    \bottomrule
+    \endlastfoot
+
+    3GPP & \textit{3rd Generation Partnership Project}. Organismo que publica las especificaciones de las redes móviles, incluidas las del núcleo 5G. \\
+
+    5G & Quinta generación de redes móviles celulares, sucesora de LTE. \\
+
+    AMF & \textit{Access and Mobility Management Function}. Función del núcleo 5G que gestiona el registro, la movilidad y la conexión de los equipos de usuario. \\
+
+    \textit{Binding} & Asociación entre una petición y una instancia productora concreta que se conserva para las operaciones posteriores de una sesión o un recurso. \\
+
+    Cilium & Complemento de red para Kubernetes basado en eBPF. En esta tesis actúa como CNI y como punto de ejecución de políticas en L3/L4. \\
+
+    CNI & \textit{Container Network Interface}. Especificación que define cómo se configura la red de los contenedores en una plataforma de orquestación. \\
+
+    Contención selectiva & Intención de seguridad que impide las comunicaciones dirigidas a una instancia o a una combinación concreta y mantiene permitidas las equivalentes. \\
+
+    Discriminador & Atributo que un punto de ejecución necesita observar para separar los casos que una política exige tratar de forma distinta. \\
+
+    eBPF & \textit{Extended Berkeley Packet Filter}. Mecanismo del núcleo Linux que ejecuta programas verificados en la ruta de red sin modificar el código de las aplicaciones. \\
+
+    gNB & Estación base de la red de acceso 5G. En el banco de pruebas la simula UERANSIM. \\
+
+    HTTP/2 & Protocolo sobre el que operan las interfaces de servicio del núcleo 5G. \\
+
+    \textit{Intent} & Descripción del resultado de seguridad que se desea obtener, con independencia del mecanismo que termine implementándolo. \\
+
+    K3s & Distribución reducida de Kubernetes empleada en el banco de pruebas. \\
+
+    Kubernetes & Plataforma de orquestación de contenedores sobre la que se despliegan las funciones de red. \\
+
+    L3/L4 y L7 & Niveles de información con los que opera un control de red. En L3/L4 se observan direcciones, puertos y protocolo; en L7, métodos, rutas y cabeceras de la operación SBA. \\
+
+    Materialización & Momento del ciclo de vida de una petición en el que un discriminador pasa a existir, por ejemplo cuando se selecciona la instancia productora. \\
+
+    Microsegmentación & Aplicación de controles de red de grano fino entre cargas de trabajo situadas dentro de un mismo dominio. \\
+
+    mTLS & TLS con autenticación mutua, en el que ambos extremos presentan certificado. \\
+
+    NF & \textit{Network Function}. Componente del núcleo 5G que consume o produce servicios mediante interfaces normalizadas. \\
+
+    NRF & \textit{Network Repository Function}. Función que mantiene el registro de instancias disponibles y atiende las consultas de descubrimiento. \\
+
+    Open5GS & Implementación de código abierto del núcleo 5G utilizada en la validación experimental. \\
+
+    PCF & \textit{Policy Control Function}. Función del núcleo 5G encargada de las políticas de sesión y de servicio. \\
+
+    PEP & \textit{Policy Enforcement Point}. Punto donde una política se aplica sobre una petición concreta. \\
+
+    Procedencia & Origen de un atributo observado y grado de confianza que puede atribuírsele frente al modelo de amenaza. \\
+
+    Realizabilidad & Capacidad de un punto de ejecución concreto para aplicar un \textit{intent} sobre una petición, dadas la información disponible y las capacidades del mecanismo. Traducción de \textit{enforceability} adoptada en esta tesis. \\
+
+    Realización en ejecución & Entrega efectiva de una petición ya autorizada. Su fallo se registra por separado y no modifica el veredicto de realizabilidad. \\
+
+    SBA & \textit{Service-Based Architecture}. Arquitectura del núcleo 5G en la que las funciones de red se ofrecen servicios entre sí mediante interfaces normalizadas. \\
+
+    SBI & \textit{Service-Based Interface}. Interfaz por la que una función de red expone o consume un servicio dentro de la SBA. \\
+
+    SCP & \textit{Service Communication Proxy}. Intermediario que enruta las peticiones entre funciones de red y puede realizar el descubrimiento y la selección de instancia. \\
+
+    SMF & \textit{Session Management Function}. Función del núcleo 5G que gestiona las sesiones de datos del usuario. \\
+
+    TLS & \textit{Transport Layer Security}. Protocolo que cifra el canal entre dos extremos y limita lo que puede inspeccionar un control situado fuera del punto de terminación. \\
+
+    UDM & \textit{Unified Data Management}. Función del núcleo 5G que administra los datos de suscripción. Sus instancias son el destino de las políticas selectivas evaluadas en esta tesis. \\
+
+    UE & \textit{User Equipment}. Terminal que se conecta a la red móvil. \\
+
+    UERANSIM & Simulador de UE y gNB que genera los procedimientos de acceso y sesión en el banco de pruebas. \\
+
+    UPF & \textit{User Plane Function}. Función que reenvía el tráfico del plano de usuario. \\
+
 \end{longtable}
+\end{singlespace}
 
 \clearpage

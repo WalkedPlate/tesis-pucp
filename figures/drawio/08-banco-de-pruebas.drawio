@@ -1,0 +1,95 @@
+<mxfile host="app.diagrams.net" agent="Claude" type="device">
+  <diagram id="fig08" name="Banco de pruebas">
+    <mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="826" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" value="Diagrama" parent="0" />
+        <mxCell id="L2" value="Titulo" parent="0" />
+
+        <mxCell id="k3s" value="Cl&#250;ster K3s &#8212; Cilium como CNI y como punto de control L3/L4" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#B3B3B3;dashed=1;dashPattern=6 4;fontColor=#666666;fontSize=12;fontFamily=Times New Roman;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fontStyle=1;strokeWidth=1;container=1;pointerEvents=0;collapsible=0;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="1080" height="490" as="geometry" />
+        </mxCell>
+        <mxCell id="o5gs" value="Open5GS 2.8.0 &#8212; 5G Core" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#C4C4C4;fontColor=#777777;fontSize=11;fontFamily=Times New Roman;verticalAlign=top;align=left;spacingLeft=10;spacingTop=6;fontStyle=1;strokeWidth=2;container=1;pointerEvents=0;collapsible=0;" vertex="1" parent="k3s">
+          <mxGeometry x="30" y="50" width="1020" height="300" as="geometry" />
+        </mxCell>
+
+        <mxCell id="amf" value="AMF" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="25" y="75" width="110" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="smf" value="SMF" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="25" y="150" width="110" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="pepa" value="&lt;b&gt;PEP antes del SCP&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px&quot;&gt;L3/L4 (Cilium) y L7&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;fontColor=#6E4E17;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="185" y="90" width="145" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="nrf" value="NRF" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#7A7A7A;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="385" y="30" width="130" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="scp" value="SCP" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#7A7A7A;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="385" y="102" width="130" height="72" as="geometry" />
+        </mxCell>
+        <mxCell id="pepb" value="&lt;b&gt;PEP despu&#233;s del SCP&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px&quot;&gt;L3/L4 (Cilium) y L7&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;fontColor=#6E4E17;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="570" y="90" width="145" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="udma" value="UDM_a" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="770" y="75" width="140" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="udmb" value="UDM_b" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=12;fontFamily=Times New Roman;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="770" y="150" width="140" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="noteo" value="Dos instancias equivalentes de UDM permiten formular pol&#237;ticas selectivas. El SCP permite comparar comunicaci&#243;n directa e indirecta conservando el resto de las condiciones." style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#C4C4C4;fontColor=#4D4D4D;fontSize=11;fontFamily=Times New Roman;align=left;verticalAlign=middle;spacingLeft=12;spacingRight=12;strokeWidth=2;" vertex="1" parent="o5gs">
+          <mxGeometry x="185" y="225" width="725" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="uer" value="&lt;b&gt;UERANSIM&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;UE y gNB simulados que generan el tr&#225;fico de se&#241;alizaci&#243;n&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F4F4F4;strokeColor=#7A7A7A;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;spacingRight=10;strokeWidth=2;" vertex="1" parent="k3s">
+          <mxGeometry x="30" y="375" width="250" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="traz" value="&lt;b&gt;Instrumentaci&#243;n&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;Registro de cabeceras SBI, identidad de red, veredicto y procedencia de cada decisi&#243;n.&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;spacingRight=10;strokeWidth=2;" vertex="1" parent="k3s">
+          <mxGeometry x="310" y="375" width="350" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="vers" value="&lt;b&gt;Versiones del entorno&lt;/b&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;Open5GS 2.8.0&#160;&#183;&#160;K3s v1.36.3&#160;&#183;&#160;Cilium 1.20.0&#160;&#183;&#160;UERANSIM 3.2.6&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#8C8C8C;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=12;spacingTop=8;spacingRight=10;strokeWidth=2;" vertex="1" parent="k3s">
+          <mxGeometry x="690" y="375" width="360" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ver" value="&lt;b&gt;Verificador diagn&#243;stico&lt;/b&gt;&#160;&#8212;&#160;compara la predicci&#243;n congelada de cada perfil con el resultado observado, mediante controles y pruebas de mutaci&#243;n, y separa la realizabilidad de los fallos posteriores de entrega." style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#666666;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;align=left;verticalAlign=middle;spacingLeft=14;spacingRight=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="615" width="1080" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="notaf" value="Entorno de laboratorio con datos y entidades simulados: sin tr&#225;fico de abonados reales ni emisi&#243;n de radiofrecuencia." style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=none;fontColor=#777777;fontSize=11;fontFamily=Times New Roman;align=left;verticalAlign=middle" vertex="1" parent="1">
+          <mxGeometry x="50" y="710" width="1080" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e0" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9A9A9A;endArrow=block;endFill=1;endSize=8;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0" edge="1" parent="1" source="uer" target="amf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.35;entryDx=0;entryDy=0" edge="1" parent="1" source="amf" target="pepa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.7;entryDx=0;entryDy=0" edge="1" parent="1" source="smf" target="pepa">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="pepa" target="scp">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9A9A9A;endArrow=open;endSize=10;dashed=1;dashPattern=6 4;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0" edge="1" parent="1" source="scp" target="nrf">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="scp" target="pepb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.35;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="pepb" target="udma">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#5A5A5A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.7;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="pepb" target="udmb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t1" value="La validaci&#243;n: banco de pruebas en entorno controlado" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1A1A1A;fontFamily=Times New Roman" vertex="1" parent="L2">
+          <mxGeometry x="50" y="20" width="1000" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="Puntos de control situados antes y despu&#233;s del intermediario, en L3/L4 y en L7" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;fontFamily=Times New Roman" vertex="1" parent="L2">
+          <mxGeometry x="50" y="46" width="1000" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -1,0 +1,48 @@
+<mxfile host="app.diagrams.net" agent="Claude" type="device">
+  <diagram id="fig09" name="Mapa de la tesis">
+    <mxGraphModel dx="1400" dy="900" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="520" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" value="Diagrama" parent="0" />
+        <mxCell id="L2" value="Titulo" parent="0" />
+
+        <mxCell id="b1" value="&lt;b&gt;Problema&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;Una pol&#237;tica selectiva puede escribirse en el lenguaje, pero el punto de ejecuci&#243;n elegido puede carecer, al decidir, de la informaci&#243;n necesaria para aplicarla.&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#FBEDEB;strokeColor=#B03A2E;fontColor=#7B2A21;fontSize=13;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=14;spacingTop=12;spacingRight=12;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="110" width="240" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b2" value="&lt;b&gt;Propuesta&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;Un perfil de ejecuci&#243;n y un verificador que eval&#250;a en orden materializaci&#243;n, visibilidad, confianza y capacidad de acci&#243;n.&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF2F8;strokeColor=#4A6D96;fontColor=#1F3A5F;fontSize=13;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=14;spacingTop=12;spacingRight=12;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="330" y="110" width="240" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b3" value="&lt;b&gt;Validaci&#243;n&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;Banco de pruebas con Open5GS, K3s, Cilium y UERANSIM, con puntos de control antes y despu&#233;s del SCP y predicciones congeladas.&lt;/span&gt;" style="shape=hexagon;perimeter=hexagonPerimeter2;fixedSize=1;whiteSpace=wrap;html=1;fillColor=#FBF3E4;strokeColor=#B58133;fontColor=#6E4E17;fontSize=13;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=14;spacingTop=12;spacingRight=12;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="610" y="110" width="240" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="b4" value="&lt;b&gt;Resultado&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;font-size:11px;color:#4D4D4D&quot;&gt;Un criterio reproducible para decidir, antes de desplegar una pol&#237;tica, si el PEP elegido puede aplicarla; y la causa cuando no puede.&lt;/span&gt;" style="rounded=1;absoluteArcSize=1;arcSize=6;whiteSpace=wrap;html=1;fillColor=#EDF5F0;strokeColor=#3B7A57;fontColor=#2A5A40;fontSize=13;fontFamily=Times New Roman;align=left;verticalAlign=top;spacingLeft=14;spacingTop=12;spacingRight=12;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="890" y="110" width="240" height="190" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rq" value="&lt;b&gt;Pregunta de investigaci&#243;n:&lt;/b&gt;&#160; &#191;en qu&#233; perfiles de ejecuci&#243;n puede un &#250;nico PEP aplicar de forma preventiva y segura un intent de contenci&#243;n selectiva en 5G Core SBA, y qu&#233; causa explica los casos en los que no puede hacerlo?" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F7F7F7;strokeColor=#9A9A9A;fontColor=#333333;fontSize=12;fontFamily=Times New Roman;align=left;verticalAlign=middle;spacingLeft=14;spacingRight=14;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="50" y="345" width="1080" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="alc" value="Alcance: un solo punto de ejecuci&#243;n, decisi&#243;n al recibir la petici&#243;n y aplicaci&#243;n preventiva." style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=11;fontColor=#777777;fontFamily=Times New Roman" vertex="1" parent="1">
+          <mxGeometry x="50" y="425" width="1080" height="24" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9A9A9A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="b1" target="b2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9A9A9A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="b2" target="b3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#9A9A9A;endArrow=block;endFill=1;endSize=8;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0" edge="1" parent="1" source="b3" target="b4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="t1" value="Mapa general de la tesis" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1A1A1A;fontFamily=Times New Roman" vertex="1" parent="L2">
+          <mxGeometry x="50" y="30" width="1000" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="t2" value="Del problema de ingenier&#237;a al resultado verificable" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;fontSize=12;fontColor=#666666;fontFamily=Times New Roman" vertex="1" parent="L2">
+          <mxGeometry x="50" y="56" width="1000" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
